@@ -196,28 +196,29 @@ generatorToParityCheck(Matrix) := Matrix => M -> (
       
     -- vertically concatenate an identity matrix of rank (n-k),
     -- then transpose :
-    return permuteMatrixColumns(transpose (id_(F^nk) || -redG),inversePermutation(P))
-
+    permuteMatrixColumns(transpose (id_(F^nk) || -redG),inversePermutation(P))
     )
 
 parityCheckToGenerator = method(TypicalValue => Matrix)
 parityCheckToGenerator(Matrix) := Matrix => M -> (
-    return(transpose generators kernel M)
+    transpose generators kernel M
     )
 
 -- If generator or parity check is not full rank, 
 -- choose a subset of rows that are generators:
 reduceMatrix = method(TypicalValue => Matrix)
 reduceMatrix(Matrix) := Matrix => M -> (
-    return transpose groebnerBasis transpose M
+    transpose groebnerBasis transpose M
     )
 
 reduceRankDeficientMatrix = method(TypicalValue => Matrix)
 reduceRankDeficientMatrix(Matrix) := Matrix => M -> (
     -- check if matrix is of full rank, otherwise return reduced:
-    if (rank M == min(rank M.source,rank M.target)) then {
-	return M
-	} else return reduceMatrix(M)
+    if (rank M == min(rank M.source,rank M.target)) then (
+	M
+	) else (
+	reduceMatrix M
+	)
     )
 
 -- internal function to validate user's input
@@ -292,7 +293,7 @@ rawLinearCode(List) := LinearCode => (inputVec) -> (
     
     codeSpace := image transpose newGenMat;
           
-    return new LinearCode from {
+    new LinearCode from {
         symbol AmbientModule => inputVec_0,
 	symbol BaseField => inputVec_1,
         symbol Generators => newGens,
@@ -324,8 +325,7 @@ linearCode(Module,List) := LinearCode => opts -> (M,L) -> (
 	outputVec =  {M, M.ring, newL , {}};
 	};
     
-    return rawLinearCode(outputVec)
-    
+    rawLinearCode outputVec    
     )
 
 linearCode(GaloisField,ZZ,List) := LinearCode => opts -> (F,n,L) -> (
@@ -345,8 +345,7 @@ linearCode(GaloisField,ZZ,List) := LinearCode => opts -> (F,n,L) -> (
 	} else {
         error "The length of the code should be positive."
 	};
-    return rawLinearCode(outputVec)
-    
+    rawLinearCode outputVec
     )
 
 linearCode(GaloisField,List) := LinearCode => opts -> (F,L) -> (
@@ -365,8 +364,7 @@ linearCode(GaloisField,List) := LinearCode => opts -> (F,L) -> (
 	outputVec =  {F^n, F, newL , {}};
 	};
     
-    return rawLinearCode(outputVec)
-    
+    rawLinearCode outputVec
     )
 
 linearCode(ZZ,ZZ,ZZ,List) := LinearCode => opts -> (p,q,n,L) -> (
@@ -378,20 +376,17 @@ linearCode(ZZ,ZZ,ZZ,List) := LinearCode => opts -> (p,q,n,L) -> (
     F := GF(p,q);
     
     if n>0 then {       
-    --check whether user's input is valid or not
-    newL := wellDefinedInput {F,n,L};
-    
-    if opts.ParityCheck then {
-     	outputVec := {F^n, F, {}, newL};
-	} else {
-	outputVec =  {F^n, F, newL , {}};
-	};
-        
-    return rawLinearCode(outputVec)
-    } else {
-    error "The length of the code should be positive."
-    };
-    
+    	--check whether user's input is valid or not
+    	newL := wellDefinedInput {F,n,L};
+    	if opts.ParityCheck then {
+     	    outputVec := {F^n, F, {}, newL};
+	    } else {
+	    outputVec =  {F^n, F, newL , {}};
+	    };
+    	return rawLinearCode(outputVec)
+    	} else {
+    	error "The length of the code should be positive."
+    	};
    )
 
 linearCode(Module) := LinearCode => opts -> V -> (
@@ -415,8 +410,7 @@ linearCode(Module) := LinearCode => opts -> V -> (
 	} else {
 	outputVec = {GorP.source,R,entries GorP,{}};	
 	};
-    
-    return rawLinearCode(outputVec)
+    rawLinearCode outputVec
     )
 
 linearCode(Matrix) := LinearCode => opts -> M -> (
@@ -433,9 +427,7 @@ linearCode(Matrix) := LinearCode => opts -> M -> (
 	} else {
 	outputVec =  {M.source, M.ring, entries M, {}};
 	};
-    
-    return rawLinearCode(outputVec)
-      
+    rawLinearCode outputVec
     )
 
 --net LinearCode := c -> (
@@ -488,7 +480,7 @@ shortestPath (Digraph, Thing, List) := List => (D,start,finishSet) -> (
 	    );
 	);
     );
-    return {};
+    {}
 )
 
 --input: A list of matroids with the same ground set
@@ -552,7 +544,7 @@ matroidPartition List := List => mls -> (
 	    )
     );
     --We found a partition! Now sort it by length, largest to smallest
-    return apply(rsort apply(new List from drop(Els,1),i->(#i,i)),i->i_1);
+    apply(rsort apply(new List from drop(Els,1),i->(#i,i)),i->i_1)
 )
 
 weight = method(TypicalValue => Number)
@@ -570,7 +562,7 @@ minDistEnumerate LinearCode := Number => C -> (
     G := C.GeneratorMatrix;
     words := apply(select(X, i -> (weight i) > 0), x -> (matrix({x}))*G);
     words = apply(words, i -> weight first entries i);
-    return min words;
+    min words
     );
 
 subsetToList := (n, subset) -> (
@@ -681,7 +673,7 @@ evaluationCode(Ring,List,List) := EvaluationCode => opts -> (F,P,S) -> (
     if class(ring ideal S) === PolynomialRing then R:=(ring ideal S) else (t := getSymbol "t", R=F[t_1..t_m], S=apply(S,i->promote(i,R)));
     I := intersect apply(P,i->ideal apply(numgens R,j->R_j-i#j)); -- Vanishing ideal of the set of points.
     G := transpose matrix apply(P,i->flatten entries sub(matrix(R,{S}),matrix(F,{i}))); -- Evaluate the elements in S over the elements on P.
-    return new EvaluationCode from{
+    new EvaluationCode from{
 	symbol VanishingIdeal => I, 
 	symbol Points => P,
 	symbol PolynomialSet => S,
@@ -887,7 +879,6 @@ orderCode(Ideal,List,List,ZZ) := EvaluationCode => opts -> (I,P,G,l) -> (
 
 orderCode(Ideal,List,ZZ) := EvaluationCode => opts -> (I,G,l) -> (
     -- The same as before, but taking P as the rational points of I.
-
     P := rationalPoints I;
     orderCode(I,P,G,l)
     )
@@ -1022,10 +1013,8 @@ cyclicMatrix(GaloisField,List) := Matrix => (F,v) -> (
 	error "Elements of input cannot be coerced into same field.";
 	}; 
     
-    cyclicMatrix(newV) 
-    
+    cyclicMatrix newV
     )
-
 
 quasiCyclicCode = method(TypicalValue => LinearCode)
 
@@ -1038,7 +1027,6 @@ quasiCyclicCode(GaloisField,List) := LinearCode => (F,V) -> (
     -- of our quasi-cyclic code:
     
     linearCode(fold((m1,m2) -> m1 || m2, cyclicMatrixList))
-    
     )
 
 quasiCyclicCode(List) := LinearCode => V -> (
@@ -1049,7 +1037,6 @@ quasiCyclicCode(List) := LinearCode => V -> (
     baseField := class V_0_0;
     
     try quasiCyclicCode(baseField,V) else error "Entries not over a field."
-    
     )
 
 
@@ -1092,38 +1079,38 @@ ParityCheckMatrix => | 1 1 1 1 0 0 0 |
 
 
 cyclicCode = method (TypicalValue => LinearCode) 
+cyclicCode(GaloisField ,RingElement, ZZ) := LinearCode => (F,G,n) -> (
+    --Constructor for Cyclic Codes generated by a polynomial.
+    -- input: The generating polynomial and the lenght of the code
+    --outputs: a cyclic code defined by the initial polynomial .
+    
+    -- We should make a list of the coefficients of the polynomial. 
+    ring G;
+    x:=(gens ring G)#0;
+    f:=x^n-1;
+    t:=quotientRemainder(G,f);
+    g:=t#1;  
+    if (quotientRemainder(f,g))#1==0 then (
+	r:=toList apply(0.. (n-1),i->first flatten entries sub(matrix{{g//x^i}}, x=>0 ));
+	-- Generate the generating matrix using the funtion cyclicMatrix 
+	R:=toList apply(toList(0..n-1-(degree g)#0), i -> apply(toList(0..n-1),j -> r_((j-i)%n)));
+	linearCode(coefficientRing (ring G),R)
+	) else (
+	l := toList apply(0.. (n-1),i->first flatten entries sub(matrix{{g//x^i}}, x=>0 ));
+	-- Generate the generating matrix using the funtion cyclicMatrix 
+	L := toList apply(toList(0..n-1), i -> apply(toList(0..n-1),j -> l_((j-i)%n)));
+	linearCode(coefficientRing (ring G),L)
+	)
+    )
 
-  cyclicCode(GaloisField ,RingElement, ZZ) := LinearCode => (F,G,n) -> (
-
-      --Constructor for Cyclic Codes generated by a polynomial.
-     -- input: The generating polynomial and the lenght of the code
-     --outputs: a cyclic code defined by the initial polynomial .
-
-      -- We should make a list of the coefficients of the polynomial. 
-     ring G;
-     x:=(gens ring G)#0;
-     f:=x^n-1;
-     t:=quotientRemainder(G,f);
-     g:=t#1;  
-     if (quotientRemainder(f,g))#1==0 then {print "Cyclic Code";
- 	             r:=toList apply(0.. (n-1),i->first flatten entries sub(matrix{{g//x^i}}, x=>0 ));
-     -- Generate the generating matrix using the funtion cyclicMatrix 
-      R:=toList apply(toList(0..n-1-(degree g)#0), i -> apply(toList(0..n-1),j -> r_((j-i)%n)));
-      return linearCode(coefficientRing (ring G),R)}
-
-       else {print  "Code with a circulant matrix as generating matrix";
-       l:=toList apply(0.. (n-1),i->first flatten entries sub(matrix{{g//x^i}}, x=>0 ));
-     -- Generate the generating matrix using the funtion cyclicMatrix 
-      L:=toList apply(toList(0..n-1), i -> apply(toList(0..n-1),j -> l_((j-i)%n)));
-      return linearCode(coefficientRing (ring G),L)}
-
-        )
-
-    cyclicCode(GaloisField, ZZ, ZZ) := LinearCode => (F,G,n) -> (
-         a:=promote (G,F);
- 	 if a==0 then return zeroCode(F,n)
- 	 else return universeCode(F,n)
- 	 )
+cyclicCode(GaloisField, ZZ, ZZ) := LinearCode => (F,G,n) -> (
+    a := promote(G,F);
+    if a==0 then (
+	zeroCode(F,n)
+	)else(
+	universeCode(F,n)
+	)
+    )
 
 -*
 EXAMPLE:
@@ -1140,28 +1127,28 @@ cyclicCode(GF(7),5,4)
 --     Helper functions for constructing 
 --             LRC CODES
 -------------------------------
-
-
- LocallyRecoverableCode = method(TypicalValue => LinearCode)
- LocallyRecoverableCode(List,List,RingElement) := LinearCode => (L,A,g) -> (
-     -- generate a linear Locally Recoverable Code
-     -- input:   L={q,n,k,r}  alphabet size q, target code length n, dimension k, and locality r
-     --          A is a partition of n symbols from the alphabet,
-     --          g is a polynomial that is constanst on each subset of A (a "good" polynomial)
-
-     -- output:  a linear code for which given a symbol c_i in a codeword, there exists
-     --           "r" other symbols in the codeword c_j such that f(c_i)=f(c_j)
-     -- R:  is the polynomial ring generated by g
-     -- informationSpaceGenerators:  is a list of generators for the information space (ZZ/q)^k where k is the target dimension
-     -- encodingPolynomials:  is a list of the encoding polynomials, where each polynomial corresponds to a generator of (ZZ/q)^k
-     -- codeGenerators:  contains the set of generators for the code, which are obtained by evaluation each element of the subsets of A at the encoding polynomials
-q:=L#0;
-n:=L#1;
-k:=L#2;
-r:=L#3;
+LocallyRecoverableCode = method(TypicalValue => LinearCode)
+LocallyRecoverableCode(List,List,RingElement) := LinearCode => (L,A,g) -> (
+    -- generate a linear Locally Recoverable Code
+    -- input:   L={q,n,k,r}  alphabet size q, target code length n, dimension k, and locality r
+    --          A is a partition of n symbols from the alphabet,
+    --          g is a polynomial that is constanst on each subset of A (a "good" polynomial)
+    
+    -- output:  a linear code for which given a symbol c_i in a codeword, there exists
+    --           "r" other symbols in the codeword c_j such that f(c_i)=f(c_j)
+    -- R:  is the polynomial ring generated by g
+    -- informationSpaceGenerators:  is a list of generators for the information space (ZZ/q)^k where k is the target dimension
+    -- encodingPolynomials:  is a list of the encoding polynomials, where each polynomial corresponds to a generator of (ZZ/q)^k
+    -- codeGenerators:  contains the set of generators for the code, which are obtained by evaluation each element of the subsets of A at the encoding polynomials
+    q := L#0;
+    n := L#1;
+    k := L#2;
+    r := L#3;
     -- note: check that n less than or equal to q and if the symbols of A lie in F
-    if not n<=q then print "Warning: construction requires that target length <= field size.";
-
+    if not n<=q then (
+	error "Warning: construction requires that target length <= field size.";
+	);
+    
     --verify that target dimension is divisible by locality
     if not k%r==0 then error "target dimension is not divisible by target locality";
 
@@ -1496,6 +1483,8 @@ vasFunction (ZZ,ZZ,Ideal) := (d,r,I) ->(
     min var6
 )
 
+
+
 ----------------------------------------------------------------------------------
 
 
@@ -1537,15 +1526,14 @@ bitflipDecode(Matrix, Vector, ZZ) := (H, v, maxI) -> (
     	toFlip := positions(numFails, n -> n == (max numFails));
     	flipVec := sum apply(toFlip, i -> vector ((entries basis source H)#i));
     	w = flipVec+w;
-    
-	
+		
 	if(H*w == 0_(target H)) then(
 	    return entries w;
 	    );
     	);
-    
-    return {};
+    {}
     );
+    
 
 tannerGraph = method(TypicalValue => Graphs$Graph)
 tannerGraph(Matrix) := H -> (
@@ -1607,6 +1595,7 @@ randLDPC(ZZ, ZZ, RR, ZZ) := (n, k, m, b) -> (
     if popcount > n*(n-k) then(
 	popcount = n*(n-k);
 	);
+    
     
     R := GF(2);
     
