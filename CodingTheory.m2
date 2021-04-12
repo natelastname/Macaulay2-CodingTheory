@@ -292,13 +292,11 @@ rawLinearCode(List) := LinearCode => (inputVec) -> (
 	symbol Code => codeSpace,
 	symbol cache => new CacheTable
 	}
-    
     )
 
 -- by default, assume that inputs are generators or generating matrices
 -- set ParityCheck => true to have inputs be rows of parity check matrix:
 linearCode = method(Options => {symbol ParityCheck => false})
-
 linearCode(Module,List) := LinearCode => opts -> (M,L) -> (
     -- constructor for a linear code
     -- input: ambient vector space/module S, list of generating codewords
@@ -541,27 +539,27 @@ weight BasicList := Number => c -> (
     sum(new List from (apply(0..length c-1, i-> if c_i == 0 then 0 else 1)))
     )
 
-
--- A brute force implementation of minimum distance.
--- This should not be exported because the function minimumWeight automatically
--- decides whether this or the other algorithm is faster. 
-minDistEnumerate = method(TypicalValue => Number)
-minDistEnumerate LinearCode := Number => C -> (
-    X := messages(C);
-    G := C.GeneratorMatrix;
-    words := apply(select(X, i -> (weight i) > 0), x -> (matrix({x}))*G);
-    words = apply(words, i -> weight first entries i);
-    min words
-    );
-
 subsetToList := (n, subset) -> (
     for i from 0 to (n-1) list(
 	if member(i, subset) then 1 else 0
        	)
     );
 
-minimumWeight = method(TypicalValue => ZZ)
-minimumWeight LinearCode := ZZ => C -> (
+-- A brute force implementation of minimum distance.
+minDistBrute = method(TypicalValue => Number)
+minDistBrute LinearCode := Number => C -> (
+    X := messages(C);
+    G := C.GeneratorMatrix;
+    words := apply(select(X, i -> (weight i) > 0), x -> (matrix({x}))*G);
+    words = apply(words, i -> weight first entries i);
+    minWeightC := min words;
+    C.cache#"minWeight" = minWeightC;
+    minWeightC
+    )
+
+-- Calculate minimum distance using the matroid partition algorithm.
+minDistMatroidPart = method(TypicalValue => Number)
+minDistMatroidPart LinearCode := ZZ => C -> (
     M := matrix C.Generators;
     k := rank reduceMatrix(C.GeneratorMatrix);
     n := length C;
@@ -570,30 +568,6 @@ minimumWeight LinearCode := ZZ => C -> (
     w := 1;
     j := 1;
     
-    if C.cache#?("minWeight") then(
-	return C.cache#"minWeight";
-	);
-        
-    -- The number of matrix multiplications it would need to do using the
-    -- brute force algorithm.
-    R := ring(C);
-    numCodewords := (R.order)^k;
-    
-    -- The number of  (k x k) matrices it will need to compute the rank of.
-    -- This computation takes place in the matroid constructor, matroid(Matrix). 
-    numMatrices := binomial(numcols M, k);
-    
-    -- This estimation is such that the only way that it can choose to use the
-    -- brute force algorithm when it should have used the matroid partition 
-    -- algorithm is if the code in the Matroids package changes. (This assumes that
-    -- a call to "rank" on a (k x k) matrix and a message encoding of C take about the 
-    -- same amount of time. Also, it assumes that this function actually does call "matroid" 
-    -- on the generator matrix of C.)
-    if numMatrices > numCodewords then(
-	x := (minDistEnumerate C);
-	C.cache#"minWeight" = x;
-	return x;
-	);
     --Partition columns of LinearCode into information sets
     cMatroid := matroid(M);
     cMatroids := apply(toList(1..l),i->cMatroid);
@@ -610,11 +584,11 @@ minimumWeight LinearCode := ZZ => C -> (
     while(true) do (
         permutation := join(T_(j-1),toList(0..n-1)-set(T_(j-1)));
 	G := reduceMatrix(M_permutation);
-
+    	
 	sameWeightWords := apply(subsets(k,w), x -> subsetToList(k,x));
 	sameWeightWords = flatten apply(sameWeightWords, x -> enumerateVectors(ring(C), x));
 	specialCodewords := apply(sameWeightWords, u -> flatten entries ((matrix({toList u}))*G));
-
+    	
         dupper = min(append(apply(specialCodewords, i->weight i),dupper));
         dlower = sum(toList apply(1..j,i->max(0,w+1-k+r_(i-1))))+sum(toList apply(j+1..D,i->max(0,w-k+r_(i-1))));
 	
@@ -626,6 +600,47 @@ minimumWeight LinearCode := ZZ => C -> (
 	    );
     	if w > k then error "No minimum weight found.";
     	)
+    )
+
+minimumWeight = method(TypicalValue => ZZ, Options => {Strategy=>""})
+minimumWeight LinearCode := ZZ => opts -> C -> (
+    
+    if C.cache#?("minWeight") then(
+	return C.cache#"minWeight";
+	);
+    if opts.Strategy == "MatroidPartition" then (
+    	return minDistMatroidPart C;
+	);
+    if opts.Strategy == "BruteForce" then(
+	return minDistBrute C;
+	);
+    if opts.Strategy != "" then(
+	error "Strategy '"|toString(opts.Strategy)|"' not recognized.";
+	);
+    
+    -- If no strategy specified, try to guess which one to use.
+    M := matrix C.Generators;
+    k := rank reduceMatrix(C.GeneratorMatrix);
+
+    -- The number of matrix multiplications needed to perform the brute force algorithm.
+    R := ring(C);
+    numCodewords := (R.order)^k;
+    	
+    -- The number of  (k x k) matrices it will need to compute the rank of.
+    -- This computation takes place in the matroid constructor, matroid(Matrix). 
+    numMatrices := binomial(numcols M, k);
+	
+    -- This estimation is such that the only way that it can choose to use the
+    -- brute force algorithm when it should have used the matroid partition 
+    -- algorithm is if the code in the Matroids package changes. (This assumes that
+    -- a call to "rank" on a (k x k) matrix and a message encoding of C take about the 
+    -- same amount of time. Also, it assumes that this function actually does call "matroid" 
+    -- on the generator matrix of C.)
+    if numMatrices > numCodewords then(
+	minDistBrute C
+	)else(
+	minDistMatroidPart C
+	)   
     )
 
 
@@ -652,7 +667,6 @@ minimumWeight LinearCode := ZZ => C -> (
 EvaluationCode = new Type of HashTable
 
 evaluationCode = method(Options => {})
-
 evaluationCode(Ring,List,List) := EvaluationCode => opts -> (F,P,S) -> (
     -- constructor for the evaluation code
     -- input: a field F, a list of points in F^m, a set of polynomials over F in m variables.
@@ -791,10 +805,10 @@ cartesianCode(Ring,List,ZZ) := EvaluationCode => opts -> (F,S,d) -> (
     -- Constructor for cartesian codes.
     -- inputs: A field F, a set of tuples representing the subsets of F and the degree d.
     -- outputs: the cartesian code of degree d.
-    m:=#S;
+    m := #S;
     t := getSymbol "t";
-    R:=F[t_0..t_(m-1)];
-    M:=apply(flatten entries basis(R/monomialIdeal basis(d+1,R)),i->lift(i,R));
+    R := F[t_0..t_(m-1)];
+    M := apply(flatten entries basis(R/monomialIdeal basis(d+1,R)),i->lift(i,R));
     cartesianCode(F,S,M)
     )
    
@@ -805,15 +819,12 @@ cartesianCode(Ring,List,Matrix) := EvaluationCode => opts -> (F,S,M) -> (
     
     -- Should we add a second version of this function with a third argument an ideal? For the case of decreasing monomial codes.
     
-    m := #S;
-    
+    m := #S;    
     t := getSymbol "t";
     R := F[t_0..t_(m-1)];
     T := apply(entries M,i->vectorToMonomial(vector i,R));
-    
     cartesianCode(F,S,T)
     )
-
 
 RMCode = method(TypicalValue => EvaluationCode)
 RMCode(ZZ,ZZ,ZZ) := EvaluationCode => (q,m,d) -> (
@@ -826,7 +837,6 @@ RMCode(ZZ,ZZ,ZZ) := EvaluationCode => (q,m,d) -> (
     cartesianCode(F,S,d)
     )
 
-
 RSCode = method(TypicalValue => EvaluationCode)
 RSCode(Ring,List,ZZ) := EvaluationCode => (F,S,d) -> (
     -- Contructor for a Reed-Solomon code.
@@ -834,15 +844,12 @@ RSCode(Ring,List,ZZ) := EvaluationCode => (F,S,d) -> (
     cartesianCode(F,{S},d-1)
     )
 
-
 orderCode = method(Options => {})
-
 orderCode(Ring,List,List,ZZ) := EvaluationCode => opts -> (F,P,G,l) -> (
     -- Order codes are defined through a set of points and a numerical semigroup.
     -- Inputs: A field, a list of points P, the minimal generating set of the semigroup (where G_1<G_2<...) of the order function, a bound l.
     -- Outputs: the evaluation code evaluated in P by the polynomials with weight less or equal than l.    
     -- We should add a check to way if all the points are of the same length.
-    
     m := length P#0;
     t := getSymbol "t";
     R := F[t_0..t_(m-1), Degrees=>G];
@@ -1014,7 +1021,6 @@ quasiCyclicCode(GaloisField,List) := LinearCode => (F,V) -> (
     
     -- vertically concatenate all of the codewords in blocks
     -- of our quasi-cyclic code:
-    
     linearCode(fold((m1,m2) -> m1 || m2, cyclicMatrixList))
     )
 
@@ -1028,13 +1034,11 @@ quasiCyclicCode(List) := LinearCode => V -> (
     try quasiCyclicCode(baseField,V) else error "Entries not over a field."
     )
 
-
 -*
 F = GF(5)
 L = apply(toList(1..2),j-> apply(toList(1..4),i-> random(F)))
 C=quasiCyclicCode(L)
 *-
-
 HammingCode = method(TypicalValue => LinearCode)
 HammingCode(ZZ,ZZ) := LinearCode => (q,r) -> (
         
@@ -1109,9 +1113,6 @@ cyclicCode(GF(7),(x+3)*(x-1)*(x^3-2),9)
 cyclicCode(GF(7),5,4)
 *- 
 
-
-
-
 ------------------------ -------------
 --     Helper functions for constructing 
 --             LRC CODES
@@ -1149,9 +1150,6 @@ LocallyRecoverableCode(List,List,RingElement) := LinearCode => (L,A,g) -> (
     codeGenerators := apply(encodingPolynomials, polyn -> (apply( (flatten A), sym -> ( polyn[sym]%(q) ) ) ) );
     linearCode(GF(q),codeGenerators) 
     )
-
-
-
 
 ---------------------------------------------
 --   ENCODING POLYNOMIAL FOR LRC CODES    --
@@ -1195,10 +1193,7 @@ getLRCencodingPolynomial(ZZ,ZZ,List,RingElement) := RingElement => (k,r,informat
  *-
 
 
--------------------------   END   MATT
---------------------------------------------
-
-
+-------------------------   END   MATT --------------------------------------------
 
 ------------------------------------------
 ------------------------------------------
@@ -1217,7 +1212,6 @@ ring LinearCode := Ring => C -> (
     ring(C.GeneratorMatrix)
     )
 
-
 --input: A linear code C
 --output: The field C is a code over
 --description: Given a linear code, the function returns the field C is a code over
@@ -1225,7 +1219,6 @@ field = method(TypicalValue => Ring)
 field LinearCode := Ring => C -> (
     C.BaseField
     )
- 
 
 --input: A linear code C
 --output: The vector space spanned by the generators of C
