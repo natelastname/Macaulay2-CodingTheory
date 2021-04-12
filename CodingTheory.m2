@@ -26,7 +26,8 @@ newPackage(
 	    "Graphs",
 	    "NAGtypes",
 	    "RationalPoints", 
-	    "Matroids"
+	    "Matroids",
+	    "PrimaryDecomposition"
 	    },
         PackageExports => {
 	    "SRdeformations",
@@ -233,7 +234,7 @@ wellDefinedInput(List) :=  UserInput -> (
     if UserInput_2 != {} then {
     	-- check that the length of all generating codewords equals the rank of AmbienModule:
     	if not all(UserInput_2,codeword -> (length codeword) == UserInput_1) then {
-	    error "Expected codewords all to be the same length and equal to the rank of the Module";
+	    error "Expected codewords all to be the same length and equal to the rank of the module";
 	    } 
 	else {
 	    -- coerce generators into base field, if possible, an return them:
@@ -1439,13 +1440,13 @@ random (QuotientRing, ZZ, ZZ) := LinearCode => opts -> (R, n, k) -> (
 --****************** Footprint Function ********************
 footPrint = method(TypicalValue => ZZ);
 footPrint (ZZ,ZZ,Ideal) := (d,r,I) ->(
-var1:=subsets(flatten entries basis(d,coker gens gb I),r); 
-var2:=apply(var1,toSequence);
-var3:=apply(var2,ideal);
-var4:=apply(var3,x->if not quotient(ideal(leadTerm gens gb I),x)==ideal(leadTerm gens gb I) then 
-    degree coker gens gb ideal(ideal(leadTerm gens gb I),x)
-    else 0 );
-degree coker gens gb I - max var4
+    var1 := subsets(flatten entries basis(d,coker gens gb I),r); 
+    var2 := apply(var1,toSequence);
+    var3 := apply(var2,ideal);
+    var4 := apply(var3,x->if not quotient(ideal(leadTerm gens gb I),x)==ideal(leadTerm gens gb I) then 
+    	degree coker gens gb ideal(ideal(leadTerm gens gb I),x)
+    	else 0 );
+    degree coker gens gb I - max var4
 )
  
 -----------------------------------------------------------
@@ -1455,17 +1456,16 @@ degree coker gens gb I - max var4
 --=====================hyp function======================
 hYpFunction = method(TypicalValue => ZZ);
 hYpFunction (ZZ,ZZ,Ideal) := (d,r,I) ->(
-
-var1:=apply(toList (set(0..char ring I-1))^**(hilbertFunction(d,coker gens gb I))
-     -(set{0})^**(hilbertFunction(d,coker gens gb I)),toList);
-var2:=apply(var1,x -> basis(d,coker gens gb I)*vector deepSplice x);
-var3:=apply(var2,z->ideal(flatten entries z));
-var4:=subsets(var3,r);
-var5:=apply(var4,ideal);
-var6:=apply(var5,x -> if #set flatten entries mingens ideal(leadTerm gens x)==r and not quotient(I,x)==I
-    then degree(I+x)
-    else 0);
-max var6
+    var1:=apply(toList (set(0..char ring I-1))^**(hilbertFunction(d,coker gens gb I))
+     	-(set{0})^**(hilbertFunction(d,coker gens gb I)),toList);
+    var2:=apply(var1,x -> basis(d,coker gens gb I)*vector deepSplice x);
+    var3:=apply(var2,z->ideal(flatten entries z));
+    var4:=subsets(var3,r);
+    var5:=apply(var4,ideal);
+    var6:=apply(var5,x -> if #set flatten entries mingens ideal(leadTerm gens x)==r and not quotient(I,x)==I
+    	then degree(I+x)
+    	else 0);
+    max var6
 ) 
 
 
@@ -1473,7 +1473,7 @@ max var6
 
 gMdFunction = method(TypicalValue => ZZ);
 gMdFunction (ZZ,ZZ,Ideal) := (d,r,I) ->(
-degree(coker gens gb I)-hYpFunction(d,r,I)
+    degree(coker gens gb I)-hYpFunction(d,r,I)
  )
 
  
@@ -1483,20 +1483,18 @@ degree(coker gens gb I)-hYpFunction(d,r,I)
 
 vasFunction = method(TypicalValue => ZZ);
 vasFunction (ZZ,ZZ,Ideal) := (d,r,I) ->(
-var1:=apply(toList (set(0..char ring I-1))^**(hilbertFunction(d,coker gens gb I))
- 	    -(set{0})^**(hilbertFunction(d,coker gens gb I)),toList);
-var2:=apply(var1,x -> basis(d,coker gens gb I)*vector deepSplice x); 
-var3:=apply(var2,z->ideal(flatten entries z));
-var4:=subsets(var3,r);
-var5:=apply(var4,ideal);
-var6:=apply(var5, x -> if #set flatten entries mingens ideal(leadTerm gens x)==r and not quotient(I,x)==I
-                           then degree(coker gens gb quotient(I,x))
-                        else degree(coker gens gb I)
-       );
-min var6
+    var1:=apply(toList (set(0..char ring I-1))^**(hilbertFunction(d,coker gens gb I))
+	-(set{0})^**(hilbertFunction(d,coker gens gb I)),toList);
+    var2:=apply(var1,x -> basis(d,coker gens gb I)*vector deepSplice x); 
+    var3:=apply(var2,z->ideal(flatten entries z));
+    var4:=subsets(var3,r);
+    var5:=apply(var4,ideal);
+    var6:=apply(var5, x -> if #set flatten entries mingens ideal(leadTerm gens x)==r and not quotient(I,x)==I
+	then degree(coker gens gb quotient(I,x))
+	else degree(coker gens gb I)
+       	);
+    min var6
 )
-
-
 
 ----------------------------------------------------------------------------------
 
@@ -1548,7 +1546,6 @@ bitflipDecode(Matrix, Vector, ZZ) := (H, v, maxI) -> (
     
     return {};
     );
-    
 
 tannerGraph = method(TypicalValue => Graphs$Graph)
 tannerGraph(Matrix) := H -> (
@@ -1610,7 +1607,6 @@ randLDPC(ZZ, ZZ, RR, ZZ) := (n, k, m, b) -> (
     if popcount > n*(n-k) then(
 	popcount = n*(n-k);
 	);
-    
     
     R := GF(2);
     

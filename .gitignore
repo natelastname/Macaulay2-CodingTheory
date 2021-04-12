@@ -13,3 +13,5 @@ CodingTheory/*test*
 *.synctex.gz
 *.log
 *.fls
+*.dvi
+*.pdf
