@@ -136,42 +136,33 @@ findPivots(Matrix) := List => M -> (
     -- if the reduced basis for the code does NOT
     -- have an identity matrix on the right, 
     -- find positions of each column:
-    
     colsOfM := entries transpose M;
-    
     -- extract (ordered) positions of standard basis vectors:
-    return apply(entries id_(M.target), col -> position(colsOfM, colM -> colM == col))
-    
+    apply(entries id_(M.target), col -> position(colsOfM, colM -> colM == col))
     )
 
 permuteMatrixColumns = method(TypicalValue => Matrix)
 permuteMatrixColumns(Matrix,List) := (M,P) -> (
     -- given a list P representing a permutation,
     -- permute the columns via P:
-
-    return transpose matrix((entries transpose M)_P)
+    transpose matrix((entries transpose M)_P)
     )
 
 permuteMatrixRows = method(TypicalValue => Matrix)
 permuteMatrixRows(Matrix,List)  := (M,P) -> (
     -- given a list P representing a permutation,
     -- permute the columns via P:
-    return matrix((entries M)_P)
+    matrix((entries M)_P)
     )
 
 permuteToStandardForm = method()
 permuteToStandardForm(Matrix) := M -> (
     -- input: matrix M
     -- output: matrix P*M (permuted to move pivots to right identity block) and permutation P used
-    
     pivotPositions := findPivots(M);
-    
     P := select(toList(0..rank M.source -1), i-> not member(i,pivotPositions)) | pivotPositions;
-    
-    return {permuteMatrixColumns(M,P),P}
-    
+    {permuteMatrixColumns(M, P), P}
     )
-
 
 generatorToParityCheck = method(TypicalValue => Matrix)
 generatorToParityCheck(Matrix) := Matrix => M -> (    
@@ -221,34 +212,32 @@ reduceRankDeficientMatrix(Matrix) := Matrix => M -> (
 	)
     )
 
--- internal function to validate user's input
+-- Internal function to validate user's input.
 wellDefinedInput  = method(TypicalValue => List)
-
 wellDefinedInput(List) :=  UserInput -> (
-    -- user's input is used to create a list
-    -- UserInput={GaloisField or Ring, lengthCode, ListGenerators}
+    -- UserInput = {GaloisField or Ring, lengthCode, ListGenerators}
     -- or UserInput = {GaloisField or Ring, lengthCode,ListParityCheckRows}
     
-    -- check if "baseField" is a Galois field, throw an error otherwise:
-    if not isField UserInput_0 then  error "Codes over non-fields are not defined in this version yet.";
+    -- Check if "baseField" is a Galois field, throw an error otherwise:
+    if not isField UserInput_0 then(
+	error "Codes over non-fields are not supported.";
+    	);
+    if UserInput_2 == {} then(
+	return UserInput_2;
+	);
     
-    if UserInput_2 != {} then {
-    	-- check that the length of all generating codewords equals the rank of AmbienModule:
-    	if not all(UserInput_2,codeword -> (length codeword) == UserInput_1) then {
-	    error "Expected codewords all to be the same length and equal to the rank of the module";
-	    } 
-	else {
-	    -- coerce generators into base field, if possible, an return them:
-	    return try apply(UserInput_2, codeword -> apply(codeword, entry -> sub(entry, UserInput_0)))
-	     else {
-	    error "Entries of codewords do not live in base field/ring.";
-	    }
-	   }
-	} else {
-	return  UserInput_2
-	};
-  )
-
+    -- check that the length of all generating codewords equals the rank of AmbientModule:
+    if not all(UserInput_2,codeword -> (length codeword) == UserInput_1) then (
+	error "Expected codewords all to be the same length and equal to the rank of the module";
+	);
+    
+    -- If possible, coerce generators into base field. Otherwise, throw an error.
+    try(
+	apply(UserInput_2, codeword -> apply(codeword, entry -> sub(entry, UserInput_0)))
+	) else (
+	error "Entries of codewords do not live in base field/ring.";
+	)
+    )
 
 ------------------------------------------
 -- Linear Code Type and constructors:
@@ -1148,19 +1137,18 @@ LocallyRecoverableCode(List,List,RingElement) := LinearCode => (L,A,g) -> (
     if not n<=q then (
 	error "Warning: construction requires that target length <= field size.";
 	);
-    
+        
     --verify that target dimension is divisible by locality
-    if not k%r==0 then error "target dimension is not divisible by target locality";
+    if not k%r==0 then(
+	error "target dimension is not divisible by target locality";
+    	);
 
-     R:=ring g;
-     informationSpaceGenerators:= entries gens (ZZ/q)^k; 
-     encodingPolynomials:=apply(informationSpaceGenerators,i-> (getLRCencodingPolynomial(k,r,i,g)));
-     codeGenerators:=apply(encodingPolynomials, polyn -> (apply( (flatten A), sym -> ( polyn[sym]%(q) ) ) ) );
-     linearCode(GF(q),codeGenerators) 
+    R := ring g;
+    informationSpaceGenerators := entries gens (ZZ/q)^k; 
+    encodingPolynomials := apply(informationSpaceGenerators,i-> (getLRCencodingPolynomial(k, r, i, g)));
+    codeGenerators := apply(encodingPolynomials, polyn -> (apply( (flatten A), sym -> ( polyn[sym]%(q) ) ) ) );
+    linearCode(GF(q),codeGenerators) 
     )
-
-
-
 
 
 
@@ -1168,36 +1156,34 @@ LocallyRecoverableCode(List,List,RingElement) := LinearCode => (L,A,g) -> (
 ---------------------------------------------
 --   ENCODING POLYNOMIAL FOR LRC CODES    --
 ---------------------------------------------
- getLRCencodingPolynomial = method(TypicalValue => RingElement)
- getLRCencodingPolynomial(ZZ,ZZ,List,RingElement) := RingElement => (k,r,informationList,g) -> (
-       --      generates the encoding polynomial for an LRC code
-       -- input:    p  is a HashTable of the target parameters,
-       --    	   informationList  is a list of generators for the information space (ZZ/q)^k,
-       --           g  is a good polynomial for some partition of symbols in (ZZ/q)
-
-       -- output:   the encoding polynomial for an information vector in F^k
-
-       -- R:  is the polynomial ring generated by g
-       -- x:  is the variable(s) in the ring R
-       -- i:  is a set of limits for the summation in the formula for an encoding polynomial
-       R:=ring g;
-       x:=(gens R)#0;
-       g1:=sub(g,R);
-      i:=toList(0..(r-1));
-      -- f:  generates the coefficient polynomial for an LRC code
-       -- input:    p  is a HashTable of the target parameters,
-       --    	   informationList  is a list of generators for the information space (ZZ/q)^k,
-       --           g  is a good polynomial for some partition of symbols in (ZZ/q)
-       --           i is the row index of the matrix a_ij  in the formula for a coefficient polynomial
-      -- output:   the coefficient polynomial for an information vector in F^k  
-      -- j:  is the column index of the matrix a_ij  in the formula for a coefficient polynomial
-       f:=(k,r,informationList,g,i)->(
- 	  j:=toList(0..(k//r-1));
-       	  sum apply(j,inc -> ( (informationList_{i*2+inc}_0) * (g^inc) ))
- 	  );
-
-       sum apply(i,inc -> ( (f(k,r,informationList,g1,inc))*((x^inc) ) )) 
-       )
+getLRCencodingPolynomial = method(TypicalValue => RingElement)
+getLRCencodingPolynomial(ZZ,ZZ,List,RingElement) := RingElement => (k,r,informationList,g) -> (
+    --      generates the encoding polynomial for an LRC code
+    -- input:    p  is a HashTable of the target parameters,
+    --    	   informationList  is a list of generators for the information space (ZZ/q)^k,
+    --           g  is a good polynomial for some partition of symbols in (ZZ/q)
+    -- output:   the encoding polynomial for an information vector in F^k
+    
+    -- R:  is the polynomial ring generated by g
+    -- x:  is the variable(s) in the ring R
+    -- i:  is a set of limits for the summation in the formula for an encoding polynomial
+    R := ring g;
+    x := (gens R)#0;
+    g1 := sub(g,R);
+    i := toList(0..(r-1));
+    -- f:  generates the coefficient polynomial for an LRC code
+    -- input:    p  is a HashTable of the target parameters,
+    --    	   informationList  is a list of generators for the information space (ZZ/q)^k,
+    --           g  is a good polynomial for some partition of symbols in (ZZ/q)
+    --           i is the row index of the matrix a_ij  in the formula for a coefficient polynomial
+    -- output:   the coefficient polynomial for an information vector in F^k  
+    -- j:  is the column index of the matrix a_ij  in the formula for a coefficient polynomial
+    f:=(k, r, informationList, g, i) -> (
+	j := toList(0..(k//r-1));
+	sum apply(j,inc -> ( (informationList_{i*2+inc}_0) * (g^inc) ))
+	);
+    sum apply(i,inc -> ( (f(k, r, informationList, g1, inc))*((x^inc) ) )) 
+    )
 
 -*  example
  needsPackage("CodingTheory")
@@ -1237,7 +1223,7 @@ ring LinearCode := Ring => C -> (
 --description: Given a linear code, the function returns the field C is a code over
 field = method(TypicalValue => Ring)
 field LinearCode := Ring => C -> (
-    return C.BaseField
+    C.BaseField
     )
  
 
@@ -1245,44 +1231,40 @@ field LinearCode := Ring => C -> (
 --output: The vector space spanned by the generators of C
 vectorSpace = method(TypicalValue => Module)
 vectorSpace LinearCode := Module => C -> (
-    return C.Code
+    C.Code
     )
-
-
 
 --input: A linear code C
 --output: The ambient vector space the code is a subspace of
 ambientSpace = method(TypicalValue => Module)
 ambientSpace LinearCode := Module => C -> (
-    return C.AmbientModule
+    C.AmbientModule
     )
 
 --input: A linear code C
 --output: The vector space dimension of the ambient vector space 
 --C is a subspace of
 length LinearCode := ZZ  => C -> (
-    return rank(C.AmbientModule)
+    rank(C.AmbientModule)
     )
-
 
 --input: A linear code C
 --output: The vector space dimension of the subspace given by the
 --span of the generators of C
 dim LinearCode := Number => C -> (
-    return rank (C.Code);
+    rank (C.Code)
     )
-
 
 --input: A linear code C
 --output: The ratio (dim C)/(length C)
 informationRate = method(TypicalValue => QQ)
 informationRate LinearCode := QQ => C -> (
-    return (dim C)/(length C);
+    (dim C)/(length C)
     )
 --input: A linear code C
 --output: the number of codewords in C
 size LinearCode := ZZ => C -> (
-    return (C.BaseField.order)^(dim C)
+    (C.BaseField.order)^(dim C)
     )
 
 alphabet = method(TypicalValue => List)
@@ -1301,9 +1283,7 @@ alphabet(LinearCode) := List => C -> (
 	alphaB = {sub(0,C.BaseField)} | apply(toList(1..(C.BaseField.order-1)), i-> a^i);
 	};
     
-    -- return this alphabet:
-    alphaB    
-    
+    alphaB
     )
 
 genericCode = method(TypicalValue => LinearCode)
@@ -1317,7 +1297,7 @@ messages(LinearCode) := List => C -> (
     k := dim C ;
     A := alphabet C;
     messageSpace := apply(toList((set A)^**k) / deepSplice, c -> toList(c));
-    return messageSpace
+    messageSpace
     )
 
 -- method to compute the set of q^k codewords in an [n,k]-code:
@@ -1330,14 +1310,14 @@ codewords(LinearCode) := List => C -> (
     M := apply(messages C, m-> matrix({m}));
     
     -- map m -> mG to compute codewords:
-    return flatten apply(M, m -> entries (m*G))
+    flatten apply(M, m -> entries (m*G))
     )
 
-shorten = method(TypicalValue => LinearCode)
 -- input: An [n,k] linear code C and a set S of distinct integers { i1, ..., ir} such that 1 <= ik <= n.
 -- output: A new code from C by selecting only those codewords of C having a zeros in each of the coordinate 
 --     positions i1, ..., ir, and deleting these components. Thus, the resulting 
 --     code will have length n - r. 
+shorten = method(TypicalValue => LinearCode)
 shorten ( LinearCode, List ) := LinearCode => ( C, L ) -> (
     local newL; local codeGens; local F;
     C = linearCode(matrix (codewords C));
@@ -1351,9 +1331,11 @@ shorten ( LinearCode, List ) := LinearCode => ( C, L ) -> (
 	else 0
 	)));
 
-    if newL == {} then return C else (
-	newL = entries submatrix' ( matrix newL, L );
-	return linearCode ( C.BaseField , newL );
+    if newL == {} then(
+	C 
+	) else (
+	newL = entries submatrix'(matrix newL, L);
+	linearCode(C.BaseField, newL)
 	)
     )
 
@@ -1380,12 +1362,8 @@ shorten ( LinearCode, List ) := LinearCode => ( C, L ) -> (
 --     i-th component and deleting the i-th component from these codewords. Thus, the resulting 
 --     code will have length n - 1. 
 shorten ( LinearCode, ZZ ) := LinearCode => ( C, i ) -> (
-    
-    return shorten(C, {i})
-    
+    shorten(C, {i})
     )
-
-
 
 -- input: A module as the base field/ring, an integer n as the code length, and an integer
 --    k as the code dimension.
@@ -1406,23 +1384,16 @@ random (QuotientRing, ZZ, ZZ) := LinearCode => opts -> (R, n, k) -> (
     
 -----------------------Generalized functions in coding theory---------------------
 --------------------------------------------------------------
- --================= v-number function ========================
- 
 
-  vNumber = method(TypicalValue => ZZ);
-  vNumber (Ideal) := (I) ->
-    (
-      L:=ass I;  
-      G:=apply(0..#L-1,i->flatten flatten degrees mingens(quotient(I,L#i)/I)); 
-      N:=apply(G,i->toList(set i-set{0}));
-      min flatten N 
+--================= v-number function ========================
+vNumber = method(TypicalValue => ZZ);
+vNumber (Ideal) := (I) -> (
+    L := ass I;
+    G := apply(0..#L-1,i->flatten flatten degrees mingens(quotient(I,L#i)/I)); 
+    N := apply(G,i->toList(set i-set{0}));
+    min flatten N 
     )
 
- 
-      
- 
- 
-   
 -----------------------------------------------------------
 --****************** Footprint Function ********************
 footPrint = method(TypicalValue => ZZ);
@@ -1434,8 +1405,8 @@ footPrint (ZZ,ZZ,Ideal) := (d,r,I) ->(
     	degree coker gens gb ideal(ideal(leadTerm gens gb I),x)
     	else 0 );
     degree coker gens gb I - max var4
-)
- 
+    )
+
 -----------------------------------------------------------
 --****************** GMD Functions ********************
  
@@ -1443,17 +1414,17 @@ footPrint (ZZ,ZZ,Ideal) := (d,r,I) ->(
 --=====================hyp function======================
 hYpFunction = method(TypicalValue => ZZ);
 hYpFunction (ZZ,ZZ,Ideal) := (d,r,I) ->(
-    var1:=apply(toList (set(0..char ring I-1))^**(hilbertFunction(d,coker gens gb I))
+    var1 := apply(toList (set(0..char ring I-1))^**(hilbertFunction(d,coker gens gb I))
      	-(set{0})^**(hilbertFunction(d,coker gens gb I)),toList);
-    var2:=apply(var1,x -> basis(d,coker gens gb I)*vector deepSplice x);
-    var3:=apply(var2,z->ideal(flatten entries z));
-    var4:=subsets(var3,r);
-    var5:=apply(var4,ideal);
-    var6:=apply(var5,x -> if #set flatten entries mingens ideal(leadTerm gens x)==r and not quotient(I,x)==I
+    var2 := apply(var1,x -> basis(d,coker gens gb I)*vector deepSplice x);
+    var3 := apply(var2,z->ideal(flatten entries z));
+    var4 := subsets(var3,r);
+    var5 := apply(var4,ideal);
+    var6 := apply(var5,x -> if #set flatten entries mingens ideal(leadTerm gens x)==r and not quotient(I,x)==I
     	then degree(I+x)
     	else 0);
     max var6
-) 
+    ) 
 
 
 ------------------------GMD Function--------------------------------
@@ -1461,10 +1432,8 @@ hYpFunction (ZZ,ZZ,Ideal) := (d,r,I) ->(
 gMdFunction = method(TypicalValue => ZZ);
 gMdFunction (ZZ,ZZ,Ideal) := (d,r,I) ->(
     degree(coker gens gb I)-hYpFunction(d,r,I)
- )
+    )
 
- 
-  
 --------------------------------------------------------------
 --===================== Vasconcelos Function ================
 
@@ -1481,14 +1450,11 @@ vasFunction (ZZ,ZZ,Ideal) := (d,r,I) ->(
 	else degree(coker gens gb I)
        	);
     min var6
-)
+    )
 
 
 
 ----------------------------------------------------------------------------------
-
-
-   
 
 -*
 
@@ -1534,7 +1500,6 @@ bitflipDecode(Matrix, Vector, ZZ) := (H, v, maxI) -> (
     {}
     );
     
-
 tannerGraph = method(TypicalValue => Graphs$Graph)
 tannerGraph(Matrix) := H -> (
     R := ring(H);
@@ -1555,7 +1520,6 @@ tannerGraph(Matrix) := H -> (
     );
     Graphs$graph(symsA|symsB, flatten tannerEdges)    
 );
-
 
 randNoRepeats = method(TypicalValue => List)
 randNoRepeats (ZZ, ZZ) := (a, k) -> (
@@ -1595,7 +1559,6 @@ randLDPC(ZZ, ZZ, RR, ZZ) := (n, k, m, b) -> (
     if popcount > n*(n-k) then(
 	popcount = n*(n-k);
 	);
-    
     
     R := GF(2);
     
@@ -1642,8 +1605,7 @@ syndromeDecode(LinearCode, Matrix, ZZ) := (C, v, minDist) -> (
     
     R := ring(v);
     if(minDist <= 0) then error "cannot have minimum distance less than 0.";
-    -- check ring(v) == ring(c)?
-    
+        
     H := C.ParityCheckMatrix;
     syndrome := H*v;
     
