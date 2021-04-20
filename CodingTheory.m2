@@ -2362,8 +2362,8 @@ doc ///
     	class of linear codes
     Description
     	Text
-	    A linear code is the image of some mapping between finitely generated modules, where each module is taken to be over 
-	    the same finite field. A code word is an element of the image. A linear code in Macaulay2 is implemented as a hash table.
+	    A linear code is the image of some mapping between finitely generated vector spaces, where each vector space is taken to be over 
+	    the same finite field. A codeword is an element of the image. A linear code in Macaulay2 is implemented as a hash table.
 	    The keys of the hash table correspond to common representations of the code, as well as information about its structure. 
 	    The keys include the base field of the modules, a set of generators for the code, and more. To construct a linear code, 
 	    see @TO linearCode@.
@@ -2373,7 +2373,7 @@ doc ///
 	    C1=linearCode(F1,G1)
 	    C1.Code	
 	Text
-	    For the mapping defined above, we call the codomain of the mapping the Ambient Module. The length of a code is defined
+	    For the mapping defined above, we call the codomain of the mapping the ambient module. The length of a code is defined
 	    to be the rank of this module. 
       	Example 
 	    F2=GF(3)
@@ -2382,7 +2382,7 @@ doc ///
 	    AM=C2.AmbientModule
 	    rank(AM)==length(C2)  
 	Text
-	    Since a linear code $C$ is a vector subspace over some finite field, we may represent it using a Generator Matrix, i.e. a
+	    Since a linear code $C$ is a vector subspace over some finite field, we may represent it using a generator matrix, i.e. a
 	    matrix whose rows form a basis for $C$. The dimension of a code is the rank of the generator matrix.
 	Example
 	    dim(C2)==rank(C2.GeneratorMatrix)
@@ -2695,7 +2695,7 @@ document {
     }
 document {
     Key => {generatorToParityCheck, (generatorToParityCheck,Matrix)},
-    Headline => "Constructs a parity check Matrix given a generator matrix of a linear code over a Galois field",
+    Headline => "Constructs a parity check matrix given a generator matrix of a linear code over a Galois field",
     Usage => "generatorToParityCheck(G)",
     "Given a generator matrix G of a code C over a Galois field, this function constructs a parity check matrix for C.",
     "This constructor is provided by the package ", TO CodingTheory, ".",
@@ -2816,7 +2816,7 @@ document {
     }
 document {
     Key => {reduceMatrix, (reduceMatrix, Matrix)},
-    Headline => "Given any matrix, compute the equivalent reduce matrix",
+    Headline => "Given any matrix, compute the equivalent reduced matrix",
     Usage => "reduceMatrix(Matrix)",
     "If generator or parity check matrix is not full rank, this funtion choose a subset of rows that are generators",
     Inputs => {
@@ -2898,7 +2898,7 @@ doc ///
        (shorten, LinearCode, List)
        (shorten, LinearCode, ZZ)
    Headline
-       shortens a linear code 
+       Shortens a linear code 
    Usage
        shorten(LinearCode, List)
        shorten(LindearCode, ZZ)
@@ -2930,25 +2930,47 @@ doc ///
 
 
 doc ///
-   Key
-       (random, GaloisField, ZZ, ZZ)
-   Headline
-       A random linear code 
-   Usage
-       random(GaloisField, ZZ, ZZ)
-   Inputs
-        F:GaloisField
-	n:ZZ
-	    an integer $n$ as the length of the code. 
-	k:ZZ
-	    an integer $k$ as the dimension of the code.
-   Outputs
-       C:LinearCode
-           A random linear code of length $n$ and dimension at most $k$. 
-   Description
-       Example
-       	   F = GF(2, 4)
-	   C = random ( F , 3, 5 )
+	Key
+		(random, GaloisField, ZZ, ZZ)
+	Headline
+		a random linear code
+	Usage
+		random(F,n,k)
+	Inputs
+		F:GaloisField
+		n:ZZ
+			an integer $n$ as the length of the code. 
+		k:ZZ
+			an integer $k$ as the dimension of the code.
+	Outputs
+		C:LinearCode
+			A random linear code of length $n$ and dimension at most $k$. 
+	Description
+		Example
+			F = GF(2, 4)
+			C = random ( F , 3, 5 )
+///
+
+doc ///
+	Key
+		(random, QuotientRing, ZZ, ZZ)
+	Headline
+		a random linear code
+	Usage
+		random(Q,n,k)
+    	Inputs
+		Q:QuotientRing
+		n:ZZ
+			an integer $n$ as the length of the code.
+		k:ZZ
+			an integer $k$ as the dimension of the code.
+	Outputs
+		C:LinearCode
+			A random linear code of length $n$ and dimension at most $k$.
+	Description
+		Example
+			Q = GF(2, 4)
+			C = random ( Q , 3, 5 )
 ///
 
 doc ///
@@ -3166,7 +3188,7 @@ document {
    Inputs => {
 	"I" => Ideal => {"Graded ideal."},
 	"d" => ZZ => {"Polynomials up to degree d are used."},
-	"r" => ZZ => {"Number of l.i. polynomials that are used."}
+	"r" => ZZ => {"Number of linearly independent polynomials that are used."}
 	},
    Outputs => {
 	"i" => ZZ => {"Value of the generalized footprint function of I at (d,r)"}
@@ -3189,7 +3211,7 @@ document {
    Inputs => {
 	"I" => Ideal => {"Graded ideal."},
 	"d" => ZZ => {"Polynomials up to degree d are used."},
-	"r" => ZZ => {"Number of l.i. polynomials that are used."}
+	"r" => ZZ => {"Number of linearly independent polynomials that are used."}
 	},
    Outputs => {
        "i" => ZZ => {"Value of the hyp function of I at (d,r)."}
@@ -3211,7 +3233,7 @@ document {
    Inputs => {
 	"I" => Ideal => {"Graded ideal."},
 	"d" => ZZ => {"Polynomials up to degree d are used."},
-	"r" => ZZ => {"Number of l.i. polynomials that are used."}
+	"r" => ZZ => {"Number of linearly independent polynomials that are used."}
 	},
    Outputs => {
        "i" => ZZ => {"Value of the generalized minimum distance function of I at (d,r)"}
@@ -3236,7 +3258,7 @@ document {
    Inputs => {
 	"I" => Ideal => {"Graded ideal."},
 	"d" => ZZ => {"Polynomials up to degree d are used."},
-	"r" => ZZ => {"Number of l.i. polynomials that are used."}
+	"r" => ZZ => {"Number of linearly independent polynomials that are used."}
 	},
    Outputs => {
        "i" => ZZ => {"Value of the Vasconcelos function of I at (d,r)"}
@@ -3267,7 +3289,7 @@ document {
     Outputs => {
     List => {"A list of the base ring elements."}
     },
-    "Check if the base ring is ZZ/p and then computes the elements of the ring additively, otherwise computes them by taking a generator of the multiplicative group.",
+    "Checks if the base ring is ZZ/p and then computes the elements of the ring additively, otherwise computes them by taking a generator of the multiplicative group.",
     
     EXAMPLE {
     "F=GF(4, Variable=>a);",
@@ -3359,7 +3381,7 @@ document {
     LinearCode => {"The dual of C, a code of dimension n-k"}
     },
     
-    "The dual of a code C of length n over the field F are the elements v in F^n such that for any c in C, sum of the pointwise product is zero. These are the functionals whose image are zero over the code, this is the dual module of F^n/C.",
+    "The dual of a code C of length n over the field F are the elements v in F^n such that for any c in C, the inner product <c,v> is equal to zero. These are the functionals whose image are zero over the code, this is the dual module of F^n/C.",
     
     EXAMPLE {
     "F=GF(4,Variable=>a)",
@@ -3372,7 +3394,7 @@ document {
     
     Key => {field,(field,LinearCode)},
     
-    Headline => "Returns the field where the entries of the field belong.",
+    Headline => "Returns the field where the entries of the codewords belong.",
     
     Usage => "field C",
     
@@ -3523,7 +3545,7 @@ document {
 
 document {
     Key => {vectorSpace, (vectorSpace,LinearCode)},
-    Headline => "Vector Space generated by a generator matrix of a linear code",
+    Headline => "Vector space generated by a generator matrix of a linear code",
     Usage => "vectorSpace C",
     Inputs => {
 	"C" => LinearCode => {"A linear code over a Galois field."},
@@ -3594,25 +3616,54 @@ document {
  	   }
          }
 
-document {
-    Key => {quasiCyclicCode,(quasiCyclicCode, GaloisField,List), (quasiCyclicCode, List)},
-    Headline => "Quasi-cyclic code code constructor",
-    Usage =>"quasiCyclicCode(L)/quasiCyclicCode(F,L)",
-    Inputs => {
-          "L" => List => {"L is a list of vectors."},
-          "F" => GaloisField => {"G is the basefield of L"}
-          },
-    Outputs => {
-    "C" => LinearCode => {"Quasi-cyclic code"}
-               },
-           "Returns the quasi-cyclic code with blocks of cyclic matrices with each v in L.",
-       EXAMPLE {
-                "F = GF(5)",
-            "L = apply(toList(1..2),j-> apply(toList(1..4),i-> random(F)))",
-            "C=quasiCyclicCode(L)"
-            }
-       }
-
+doc ///
+	Key
+		quasiCyclicCode
+		(quasiCyclicCode,GaloisField,List)
+		(quasiCyclicCode,List)
+	Headline
+		constructs a quasi-cyclic code
+	Usage
+		quasiCyclicCode(F,L)
+	Inputs
+		F:GaloisField
+		L:List
+	Outputs
+		:LinearCode
+		    C
+	Description
+		Text
+			{\\tt L} is a list of vectors, whose entries belong to {\\tt F}.
+			Every vector \(v_i\) in $L$ generate a cyclic matrix $A_i$.
+			Returns the quasi-cyclic code $C$ whose generator matrix is the concatenation of the matrices $A_i.$
+		Example
+			F = GF(5);
+			L = apply(toList(1..2),j-> apply(toList(1..4),i-> random(F)));
+    	    	    	L
+			C2=quasiCyclicCode(F,L)
+    Synopsis
+    	Heading
+	    a different way to use this function
+	BaseFunction
+	    quasiCyclicCode
+	Usage
+	    quasiCyclicCode(L)
+	Inputs
+	    L:List
+	Outputs
+	    :LinearCode
+		    $C$
+	Description
+		Text
+			$L$ is a list of vectors, whose entries belong to $F.$
+			Every vector $v_i$ in $L$ generate a cyclic matrix $A_i$.
+			Returns the quasi-cyclic code $C$ whose generator matrix is the concatenation of the matrices $A_i.$
+		Example
+			F = GF(5);
+			L = apply(toList(1..2),j-> apply(toList(1..4),i-> random(F)));
+    	    	    	L
+			C2=quasiCyclicCode(L)
+///
 
 
 -----------------------------------------------
@@ -3641,6 +3692,33 @@ doc ///
 	  C.LinearCode
 	  length C.LinearCode
 	  dim C.LinearCode
+///
+
+doc ///
+	Key
+	    LocallyRecoverableCode
+	    (LocallyRecoverableCode,List,List,RingElement)
+	Headline
+	    Constructs a locally recoverable code (LRC)
+	Usage
+	    LocallyRecoverableCode(L,A,g)
+	Inputs
+	    L:List
+	    	$L=\{q,n,k,r\}$, target code over $F=GF(q)$ (Galois field with $q$ elements), of length $n$, dimension $k$, and locality $r.$
+	    A:List
+	    	a list $A$ of lists. Every sublist contains different elements of $F.$ The intersection between two sublists is empty.
+	    g:RingElement
+	    	a polynomial $g$ that is constant on the elements of each sublist in the list $A.$
+	Outputs
+	    C:LinearCode
+	Description
+	    Text
+	    	Generates an $[n,k]$ LRC $C$ with locality $r$ over $GF(q)$ from a list $A$ and a "good" polynomial $g$. This code has the property that for every $1\leq i \leq n,$ there exist $i_1,\ldots,i_r$ such that for every codeword $c$ in $C,$ the entry $c_i$ can be recovered from the entries $c_{i_1},...,c_{i_r}.$ This construction was introduced by Tamo and Barg in the paper {\it A family of optimal locally recoverable codes:} \url{https://arxiv.org/pdf/1311.3284.pdf}.
+	    Example
+	    	A={{1,3,9},{2,6,5},{4,12,10}}
+		R=(ZZ/13)[x]
+		g=x^3
+		LocallyRecoverableCode({13,9,4,2},A,g)
 ///
 
 
@@ -3716,7 +3794,7 @@ document {
     Outputs => {
 	"C" => EvaluationCode => {"Cartesian code."}
 	},
-    "F is a field, L  is a list of sets of F and d is an integer",
+    "F is a field, L  is a list of sets of F and d is an integer. ",
     "Returns the Cartesian code obtained when polynomials up to degree d are evaluated over the points on the Cartesian product made by the sets of L.",
     EXAMPLE {
 	"C=cartesianCode(ZZ/11,{{1,2,3},{2,6,8}},3);",
@@ -3816,27 +3894,6 @@ document {
      EXAMPLE {
          "R=ZZ/(13)[x];",
 	 "getLRCencodingPolynomial( 4,2, {1,0,1,1}, x^3 )"
- 	}
-     }
-
- document {
-     Key => {LocallyRecoverableCode,  (LocallyRecoverableCode, List, List, RingElement)},
-     Headline => "constructs a Locally Recoverable Code (LRC code)",
-     Usage => "LocallyRecoverableCode(L,A,g)",
-     Inputs => {
- 	"L" => List => {"L={q,n,k,r}, alphabet size q, target code length n, dimension k, and locality r"},
- 	"A" => List => {"a vector in F^k."},
- 	"g" => RingElement => {"A polynomial that is constant on the elements of each sublist in the list A."}	
- 	},
-     Outputs => {
- 	"C" => LinearCode => {"Locally Recoverable Code."}
- 	},
-     "Generates an $[n,k,r]$ - linear LRC code $C$ over $\frac{ZZ}{q}$ from an information set A and \"good\" polynomial g,",
-     EXAMPLE {
-         " A={{1,3,9},{2,6,5},{4,12,10}};",
-         " R=(ZZ/13)[x];",
-         " g=x^3;",
-         " LocallyRecoverableCode({13,9,4,2},A,g);"
  	}
      }
 
