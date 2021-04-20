@@ -2952,28 +2952,6 @@ doc ///
 ///
 
 doc ///
-	Key
-		(random, QuotientRing, ZZ, ZZ)
-	Headline
-		a random linear code
-	Usage
-		random(Q,n,k)
-    	Inputs
-		Q:QuotientRing
-		n:ZZ
-			an integer $n$ as the length of the code.
-		k:ZZ
-			an integer $k$ as the dimension of the code.
-	Outputs
-		C:LinearCode
-			A random linear code of length $n$ and dimension at most $k$.
-	Description
-		Example
-			Q = GF(2, 4)
-			C = random ( Q , 3, 5 )
-///
-
-doc ///
     Key
        (random, QuotientRing, ZZ, ZZ)
     Headline
