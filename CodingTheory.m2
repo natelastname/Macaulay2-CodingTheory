@@ -2325,7 +2325,7 @@ TEST ///
 beginDocumentation()
 document { 
 	Key => CodingTheory,
-	Headline => "a package for coding theory in M2",
+	Headline => "a package for coding theory",
 	PARA {
 	    EM "CodingTheory", " is a package to provide both
 	basic coding theory objects and routines, and methods
@@ -2407,7 +2407,7 @@ document{
     SYNOPSIS (
        Usage => "linearCode(M,L)",
        Inputs => {
-	   "M" => Module => {"A free module which is the ambien module of the linear code."},
+	   "M" => Module => {"A free module which is the ambient module of the linear code."},
 	   "L" => List => {"A non-empty list of codewords that either generate the code or the dual of the code. The codewords in L must be coercible into M."}
 	   },
        Outputs => {
@@ -2951,6 +2951,30 @@ doc ///
        	   F = GF(2, 4)
 	   C = random ( F , 3, 5 )
 ///
+
+doc ///
+    Key
+       (random, QuotientRing, ZZ, ZZ)
+    Headline
+    	A random linear code
+    Usage
+    	random(QuotientRing, ZZ, ZZ)
+    Inputs
+    	R: QuotientRing
+	n: ZZ
+	    an integer $n$ as the length of the code.
+	k: ZZ
+	    an integer $k$ as the dimension of the code.
+    Outputs
+    	C:LinearCode
+	    A random linear code of length $n$ and dimension at most $k$ over $R$.
+    Description
+    	Example
+	    R = ZZ/3
+	    C = random ( R, 5 , 3 )
+///    
+
+
 
 doc ///
    Key
@@ -3604,9 +3628,9 @@ doc ///
 	 types of evaluation codes
 	Description
 	 Text
-	  The EvaluationCode is the class of linear codes obtained by evaluating m-variate polynomials over a finite field F at a set of points in F^m. There are different constructions of evaluation codes depending on how the polynomials and points are chosen. Examples include Reed-Muller codes, monomial codes, cartesian codes, toric codes, and others.
+	  EvaluationCode is the class of linear codes obtained by evaluating m-variate polynomials over a finite field F at a set of points in F^m. There are different constructions of evaluation codes depending on how the polynomials and points are chosen. Examples include Reed-Muller codes, monomial codes, cartesian codes, toric codes, and others.
 	 Text
-	  The basic structure is a HashTable. One of the keys is the linear resulting linear code linearCode of type LinearCode. Other keys include the set of points, its vanishing ideal, the set of polynomials, and more.
+	  The basic structure is a hash table. One of the keys is the linear resulting linear code linearCode of type LinearCode. Other keys include the set of points, its vanishing ideal, the set of polynomials, and more.
 	 Example
 	  F=GF(4);
 	  R=F[x,y];
