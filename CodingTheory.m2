@@ -3164,7 +3164,7 @@ document {
    Inputs => {
 	"I" => Ideal => {"Graded ideal."},
 	"d" => ZZ => {"Polynomials up to degree d are used."},
-	"r" => ZZ => {"Number of linearly independents polynomials that are used."}
+	"r" => ZZ => {"Number of linearly independent polynomials that are used."}
 	},
    Outputs => {
 	"i" => ZZ => {"Value of the generalized footprint function of I at (d,r)"}
@@ -3187,7 +3187,7 @@ document {
    Inputs => {
 	"I" => Ideal => {"Graded ideal."},
 	"d" => ZZ => {"Polynomials up to degree d are used."},
-	"r" => ZZ => {"Number of linearly independents polynomials that are used."}
+	"r" => ZZ => {"Number of linearly independent polynomials that are used."}
 	},
    Outputs => {
        "i" => ZZ => {"Value of the hyp function of I at (d,r)."}
@@ -3209,7 +3209,7 @@ document {
    Inputs => {
 	"I" => Ideal => {"Graded ideal."},
 	"d" => ZZ => {"Polynomials up to degree d are used."},
-	"r" => ZZ => {"Number of linearly independents polynomials that are used."}
+	"r" => ZZ => {"Number of linearly independent polynomials that are used."}
 	},
    Outputs => {
        "i" => ZZ => {"Value of the generalized minimum distance function of I at (d,r)"}
@@ -3234,7 +3234,7 @@ document {
    Inputs => {
 	"I" => Ideal => {"Graded ideal."},
 	"d" => ZZ => {"Polynomials up to degree d are used."},
-	"r" => ZZ => {"Number of linearly independents polynomials that are used."}
+	"r" => ZZ => {"Number of linearly independent polynomials that are used."}
 	},
    Outputs => {
        "i" => ZZ => {"Value of the Vasconcelos function of I at (d,r)"}
