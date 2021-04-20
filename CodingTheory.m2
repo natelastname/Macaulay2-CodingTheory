@@ -480,8 +480,8 @@ matroidPartition List := List => mls -> (
     E   := (mls_0).groundSet;
     assert(all(0..r-1, i->((mls_i).groundSet)===E));
     --set up initial values: special symbols z and list of lists that'll hopefully become our partition
-    local z.
-    Z   := apply(new List from 1..r, i-> symbol z_i);
+    local z;
+    Z   := apply(new List from 1..r, i -> symbol z_i);
     Els := new MutableList from prepend(elements(E),apply(new List from 1..r, i->{}));
     
     
@@ -3876,26 +3876,7 @@ document {
  	}
      }
 
- document {
-     Key => {LocallyRecoverableCode,  (LocallyRecoverableCode, List, List, RingElement)},
-     Headline => "constructs a Locally Recoverable Code (LRC code)",
-     Usage => "LocallyRecoverableCode(L,A,g)",
-     Inputs => {
- 	"L" => List => {"L={q,n,k,r}, alphabet size q, target code length n, dimension k, and locality r."},
- 	"A" => List => {"a vector in F^k."},
- 	"g" => RingElement => {"A polynomial that is constant on the elements of each sublist in the list A."}	
- 	},
-     Outputs => {
- 	"C" => LinearCode => {"Locally Recoverable Code."}
- 	},
-     "Generates an $[n,k,r]$ - linear LRC code $C$ over $\frac{ZZ}{q}$ from an information set A and \"good\" polynomial g.",
-     EXAMPLE {
-         " A={{1,3,9},{2,6,5},{4,12,10}};",
-         " R=(ZZ/13)[x];",
-         " g=x^3;",
-         " LocallyRecoverableCode({13,9,4,2},A,g);"
- 	}
-     }
+
 
 document {
     Key => {evCodeGraph, (evCodeGraph,Ring,Matrix,List)},
