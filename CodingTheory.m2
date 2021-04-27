@@ -2,7 +2,7 @@
 newPackage(
 	"CodingTheory",
     	Version => "1.0", 
-    	Date => "May 11, 2020",
+    	Date => "May 1, 2020",
     	Authors => {
 	     {Name => "Taylor Ball", Email => "trball13@gmail.com"},
 	     {Name => "Eduardo Camps", Email => "camps@esfm.ipn.mx"},
@@ -16,7 +16,7 @@ newPackage(
 	     {Name => "Gwyn Whieldon", Email => "gwyn.whieldon@gmail.com"}
 	     },
     	HomePage => "https://academic.csuohio.edu/h_lopez/",
-    	Headline => "a package for coding theory in M2",
+    	Headline => "tools for coding theory",
 	AuxiliaryFiles => false, -- set to true if package comes with auxiliary files,
 	Configuration => {},
         DebuggingMode => false,
@@ -73,9 +73,9 @@ export {
     "toricCode",
     "evCodeGraph",
     "cartesianCode",
-    "RMCode",
+    "reedMullercode",
     "orderCode",
-    "RSCode",
+    "reedSolomoncode",
     
     -- Families of Codes
     "zeroCode",
@@ -84,7 +84,7 @@ export {
     "zeroSumCode",
     "cyclicMatrix",
     "quasiCyclicCode",
-    "HammingCode",
+    "hammingCode",
     "cyclicCode",
     
     -- LRC codes
@@ -826,8 +826,8 @@ cartesianCode(Ring,List,Matrix) := EvaluationCode => opts -> (F,S,M) -> (
     cartesianCode(F,S,T)
     )
 
-RMCode = method(TypicalValue => EvaluationCode)
-RMCode(ZZ,ZZ,ZZ) := EvaluationCode => (q,m,d) -> (
+reedMullercode = method(TypicalValue => EvaluationCode)
+reedMullercode(ZZ,ZZ,ZZ) := EvaluationCode => (q,m,d) -> (
     -- Contructor for a Reed-Muller code.
     -- Inputs: A prime power q (the order of the finite field), m the number of variables in the defining ring  and an integer d (the degree of the code).
     -- outputs: The cartesian code of the GRM code.
@@ -837,8 +837,8 @@ RMCode(ZZ,ZZ,ZZ) := EvaluationCode => (q,m,d) -> (
     cartesianCode(F,S,d)
     )
 
-RSCode = method(TypicalValue => EvaluationCode)
-RSCode(Ring,List,ZZ) := EvaluationCode => (F,S,d) -> (
+reedSolomoncode = method(TypicalValue => EvaluationCode)
+reedSolomoncode(Ring,List,ZZ) := EvaluationCode => (F,S,d) -> (
     -- Contructor for a Reed-Solomon code.
     -- Inputs: Field, subset of the field and an integer d (polynomials of degree less than d will be evaluated).
     cartesianCode(F,{S},d-1)
@@ -1039,8 +1039,8 @@ F = GF(5)
 L = apply(toList(1..2),j-> apply(toList(1..4),i-> random(F)))
 C=quasiCyclicCode(L)
 *-
-HammingCode = method(TypicalValue => LinearCode)
-HammingCode(ZZ,ZZ) := LinearCode => (q,r) -> (
+hammingCode = method(TypicalValue => LinearCode)
+hammingCode(ZZ,ZZ) := LinearCode => (q,r) -> (
         
     -- produce Hamming code
     -- q is the size of the field.
@@ -1064,7 +1064,7 @@ HammingCode(ZZ,ZZ) := LinearCode => (q,r) -> (
 
 -*
 Example:
-HammingCode(2,3)
+hammingCode(2,3)
 ParityCheckMatrix => | 1 1 1 1 0 0 0 |
                      | 0 1 0 1 1 1 0 |
                      | 0 1 1 0 0 1 1 |
@@ -2013,13 +2013,13 @@ assert( length C == n)
 
 TEST ///
 -- Hamming code over GF(2) and dimension of the dual 3.
-C1= HammingCode(2,3)
+C1= hammingCode(2,3)
 assert( length C1 == 7)
 ///
 
 TEST ///
 -- Hamming code over GF(2) and dimension of the dual 4.
-C2= HammingCode(2,4)
+C2= hammingCode(2,4)
 assert( length C2 == 15)
 ///
 
@@ -2112,7 +2112,7 @@ R = GF(5);
 L = {{1,1,1,1},{2,2,2,2}};
 C = linearCode(R,L);
 assert(informationRate(C) == 1/4)
-C = HammingCode(2,3);
+C = hammingCode(2,3);
 assert(informationRate(C) == 4/7)
 ///
 
@@ -2138,7 +2138,7 @@ assert (length(C) == 4)
 F = GF(8); L = {{1,1,1,1,1}}
 C = linearCode(F,L);
 assert(length(C) == 5);
-C = HammingCode(2,3);
+C = hammingCode(2,3);
 assert(length(C) == 7)
 ///
 
@@ -2161,7 +2161,7 @@ C = linearCode(F,L);
 m = set apply({{0},{1},{a},{a+1}}, me -> apply(me,entry -> sub(entry,F)));
 mm = set messages(C);
 assert(mm == m)
-H = HammingCode(2,3);
+H = hammingCode(2,3);
 m = {{0,0,0,0},{0,0,0,1},{0,0,1,0},{0,0,1,1},{0,1,0,0},{0,1,0,1},{0,1,1,0},{0,1,1,1},{1,0,0,0},{1,0,0,1},{1,0,1,0},{1,0,1,1},{1,1,0,0},{1,1,0,1},{1,1,1,0},{1,1,1,1}};
 Lmessage = set apply(m,plain -> apply(plain,entry->sub(entry,H.BaseField)));
 hmessage = set messages(H);
@@ -2238,19 +2238,19 @@ assert( length C.LinearCode == 9)
 
 TEST ///
 -- Reed-Muller codes.
-C=RMCode(3,3,4);
+C=reedMullercode(3,3,4);
 assert( length C.LinearCode == 27)
 ///
 
 TEST ///
 -- Reed-Solomon codes.
-C=RSCode(ZZ/11,{1,2,3},3);
+C=reedSolomoncode(ZZ/11,{1,2,3},3);
 assert( length C.LinearCode == 3)
 ///
 
 TEST ///
 -- Reed-Solomon codes.
-C=RSCode(ZZ/17,{0,1,2,3,7,11},4)
+C=reedSolomoncode(ZZ/17,{0,1,2,3,7,11},4)
 dim C.LinearCode
 assert( dim C.LinearCode == 4)
 ///
@@ -2323,7 +2323,7 @@ TEST ///
 
 
 beginDocumentation()
-document { 
+-*document { 
 	Key => CodingTheory,
 	Headline => "a package for coding theory",
 	PARA {
@@ -2353,7 +2353,31 @@ document {
 	}
     	
 	}
-
+*-
+doc ///
+	Key
+		CodingTheory
+	Headline
+		tools for Coding Theory
+	Description
+		Text
+			{\tt CodingTheory} is a package designed to provide
+			basic coding theory objects, and
+			methods for computing the basic parameters of
+			linear codes. Some of the implemented functions use commutative
+			algebra techniques.
+		Text
+			{\tt CodingTheory} currently provides constructors for
+			linear codes and evaluation codes, and a few methods for each.
+		Tree
+			:Modified Methods
+			@TO (random,GaloisField,ZZ,ZZ)@
+			@TO (random,QuotientRing,ZZ,ZZ)@
+			@TO (ring,LinearCode)@
+	Contributors
+			Branden Stone generously contributed code or worked on our
+			code at various Macaulay2 workshops.
+///
 
 doc ///
     Key 
@@ -2362,11 +2386,12 @@ doc ///
     	class of linear codes
     Description
     	Text
-	    A linear code is the image of some mapping between finitely generated vector spaces, where each vector space is taken to be over 
-	    the same finite field. A codeword is an element of the image. A linear code in Macaulay2 is implemented as a hash table.
-	    The keys of the hash table correspond to common representations of the code, as well as information about its structure. 
-	    The keys include the base field of the modules, a set of generators for the code, and more. To construct a linear code, 
-	    see @TO linearCode@.
+	    A linear code is the image of some mapping between finitely generated vector spaces,
+	    where each vector space is taken to be over the same finite field. A codeword is an element
+	    of the image. A linear code in {\it Macaulay2} is implemented as a hash table.
+	    The keys of the hash table correspond to common representations of the code, as well as
+	    information about its structure. The keys include the base field of the modules, a set
+	    of generators for the code, and more. To construct a linear code, see @TO linearCode@.
 	Example
 	    F1=GF(2)
 	    G1={{1,1,0,0,0,0},{0,0,1,1,0,0},{0,0,0,0,1,1}}
@@ -2394,6 +2419,9 @@ doc ///
 	    c=matrix{G2_0}
 	    h=transpose matrix({(entries(C2.ParityCheckMatrix))_0})
  	    c*h
+    Caveat
+	While some functions may work even when a ring is given, instead of a finite field,
+	it is possible that the results are not the expected ones.
 ///
 -----------------------------------------------
 -----------------------------------------------
@@ -2401,154 +2429,263 @@ doc ///
 -----------------------------------------------
 -----------------------------------------------
 
-document{
-    Key => {linearCode, [linearCode,ParityCheck],(linearCode,Module,List), (linearCode,GaloisField,ZZ,List), (linearCode,GaloisField,List), (linearCode,ZZ,ZZ,ZZ,List), (linearCode,Module), (linearCode,Matrix)},
-    Headline => "Functions to construct linear codes over Galois fields",
-    SYNOPSIS (
-       Usage => "linearCode(M,L)",
-       Inputs => {
-	   "M" => Module => {"A free module which is the ambient module of the linear code."},
-	   "L" => List => {"A non-empty list of codewords that either generate the code or the dual of the code. The codewords in L must be coercible into M."}
-	   },
-       Outputs => {
-	   "C" => LinearCode => {"A linear code whose ambient module is M."},
-	   },
-       "Given a free module M=F^n, where F is a Galois field, and a non-empty list L of codewords, this function returns a linear code C whose ambient module is M. ",
-       "If no optional imput is specified then the code C is generated by L. ",
-       "If the optional input ParityCheck => true is specified then C is the dual of the linear code over F generated by L.",
-       EXAMPLE {
-	"F = GF(4,Variable => a); M = F^5; L = {{1,0,a,0,0},{0,a,a+1,1,0},{1,1,1,a,0}};",
-	"C = linearCode(M,L)",
-	"C.AmbientModule",
-	"C.BaseField",
-	"C.Generators",
-	"C.GeneratorMatrix",
-	"C.ParityCheckMatrix",
-	"C.Code"
-	},
-       "This is an example using the optional argument ParityCheck=>true.",
-       EXAMPLE {
-	"F = GF(8,Variable =>a); M = F^4; L = {{a+1,a+1,a+1,a+1}}",
-        "C = linearCode(M,L,ParityCheck => true)",
-	"G = C.GeneratorMatrix",
-	"H = C.ParityCheckMatrix"
-	}
-	),
-    SYNOPSIS (
-       Usage => "linearCode(F,n,L)",
-       Inputs => {
-	   "F" => Module => {"A Galois Field over which the code is defined."},
-	   "n" => ZZ => {"A positive integer which is the length of the code."},
-	   "L" => List => {"A non-empty list of codewords that either generate the code or the dual of the code. The codewords in L must have entries coercible into the field F."}
-	   },
-       Outputs => {
-	   "C" => LinearCode => {"A linear code of length n over F."},
-	   },
-       "Given a Galois Field F, the length of the code n, and a non-empty list L, this function returns a linear code C of length n over F. ",
-       "If no optional input is specified then the linear code C is generated by L. ",
-       "If the optional input ParityCheck => true is specified then the code C is the dual of the code generated by L.",
-       EXAMPLE {
-	   "F = GF 4; n = 4; L = {{1,0,1,0},{1,0,1,0}};",
-	   "C = linearCode(F,n,L)",
-	   "F = GF(9,Variable => a); n = 5; L = {{1,0,a,0,0},{0,a,a+1,1,0},{1,1,1,a,0}};",
-	   "C = linearCode(F,n,L,ParityCheck => true)",
-	   "C.GeneratorMatrix",
-	   "C.ParityCheckMatrix"
-	}
-	),
-    SYNOPSIS (
-	Usage => "linearCode(F,L)",
-	Inputs => {
-	    "F" => GaloisField => {"A Galois Field over which the code is defined."},
-	    "L" => List => {"A non-empty list of codewords that either generate the code or the dual of the code. The codewords in L must have entries coercible into the field F."},
-	    },
-	Outputs => {
-	    "C" => {"A linear code over F."},
-	    },
-	"Given a Galois Field F and a non-empty list L, this function generates a linear code C over F. ",
-	"If no optional input is specified then the code C is generated by L. ",
-	"If the optional input ParityCheck => true is specified then C is the dual of the linear code over F generated by L.",
-	EXAMPLE {
-	    "F = GF 4; L = {{1,1,0,0},{0,0,1,1}};",
-	    "linearCode(F,L)",
-	    "F = GF(9,Variable => a); L = {{1,0,a,0,0},{0,a,a+1,1,0},{1,1,1,a,0}};",
-	    "C = linearCode(F,L,ParityCheck => true)",
-	    "C.GeneratorMatrix",
-	    "C.ParityCheckMatrix"
-	    }
-	),
-    SYNOPSIS (
-	Usage => "linearCode(p,r,n,L)",
-	Inputs => {
-	    "p" => ZZ => {"A prime number which is the characteristic of the Galois field."},
-	    "r" => ZZ => {"A positive integer to be used as a power of p."},
-	    "n" => ZZ => {"A positive integer which is the lenght of the code."},
-	    "L" => List => {"A non-empty list of codewords that either generate the code or the dual of the code. The codewords in L must have entries coercible into the field F."},
-	    },
-	Outputs => {
-	    "C" => {"A linear code over the Galois Field GF(p^q)."}
-	    },
-	"Given a prime p, positive integers r and n, and  a non-empty list L, this function creates a linear code C of length n over the Galois Field GF(p^r). ",
-	"If no optional input is specified then the code C is generated by L.
-",
-	"If the optional input ParityCheck => true is specified then C is the dual of the linear code over F generated by L.",
-	EXAMPLE {
-	    "p = 2; r = 2; n=4; L = {{1,0,1,0},{0,1,1,1}};",
-	    "linearCode(p,r,n,L)",
-	    "p = 3; r = 2; n = 5;",
-	    "ambient GF(p,r)",
-	    "L = {{1,0,a,0,0},{0,a,a+1,1,0},{1,1,1,a+1,0}}",
-	    "linearCode(p,r,n,L)"
-	    }
-	),
-    SYNOPSIS (
-	Usage => "linearCode(Module)",
-	Inputs => {
-	    "V" => Module => {"A submodule of a free module over a Galois Field, which will be converted into a code."},
-	    },
-	Outputs => {
-	    "C" => LinearCode => {"A linear code which is equal to the submodule V."}
-	    },
-	EXAMPLE {
-	    "F = GF 2; M = transpose matrix {apply({1,1,1,1},entry -> sub(entry,F))}",
-	    "V = image M;",
-	    "C = linearCode(V)",
-	    "C.AmbientModule",
-	    "C.BaseField",
-	    "C.GeneratorMatrix",
-	    "C.ParityCheckMatrix"	    
-	    }
-	),
-    SYNOPSIS (
-	Usage => "linearCode(G)",
-	Inputs => {
-	    "G" => Matrix => {"A generator matrix of a code if ParityCheck=>false, or a parity check matrix of a code if ParityCheck => true."}
-	    },
-	Outputs => {
-	    "C" => {"A linear code whith generator matrix G or parity check matrix G."}
-	    },
-	"Given a matrix G whose entires are in a  Galois Field F, this functions creates a linear code C over F. ",
-	"If no optional input is specified then the code C has generator matrix G. ",
-	"If the optional input ParityCheck => true is specified then G is taken as the parity check matrix of the code C.",
-	EXAMPLE {
-	    "F = GF 4;",
-	    "L = apply({{1,0,1,0},{0,1,1,1}},codeword ->apply(codeword,entry->sub(entry,F)));",
-	    "M = matrix L;",
-	    "C = linearCode(M)",
-	    "C.GeneratorMatrix",
-	    "C.ParityCheckMatrix"
-	    },
-	"The next is an example where the optional argument ParityCheck => true is specified.",
-	EXAMPLE {
-	    "F = GF(4,Variable => a);",
-	    "L = {{1,0,a,0,0},{0,a,a+1,1,0},{1,1,1,a,0}};",
-	    "M = matrix L;",
-	    "C = linearCode(F,L,ParityCheck => true)",
-	    "C.GeneratorMatrix",
-	    "C.ParityCheckMatrix"
-	    }
-	)
-    }
+
+doc ///
+	Key
+		linearCode
+		[linearCode,ParityCheck]
+		(linearCode,Module,List)
+		(linearCode,GaloisField,ZZ,List)
+		(linearCode,GaloisField,List)
+		(linearCode,ZZ,ZZ,ZZ,List)
+		(linearCode,Module)
+		(linearCode,Matrix)
+	Headline
+		functions to construct linear codes over Galois fields
+	Usage
+		linearCode(G)
+		linearCode(M)
+		linearCode(M,L)
+		linearCode(F,L)
+		linearCode(F,n,L)
+		linearCode(p,r,n,L)
+	Inputs
+		G:Matrix
+		M:Module
+		F:GaloisField
+		p:ZZ
+		r:ZZ
+		n:ZZ
+		L:List
+	Outputs
+		:LinearCode
+			$C$
+	Description
+		Text
+			We present below the different ways in how a linear code $C$ can be defined.
+    	Caveat
+		While some functions may work even when a ring is given, instead of a finite field,
+		it is possible that the results are not the expected ones.
+    Synopsis
+    	Heading
+		a matrix is given
+	BaseFunction
+		linearCode
+	Usage
+		linearCode(G)
+	Inputs
+		G:Matrix
+	Outputs
+		:LinearCode
+			$C$
+	Description
+		Text
+			Given a matrix {\tt G}, whose entries are in a Galois field {\tt F},
+			this function returns a linear code $C$ over {\tt F}.
+		Text
+			If no optional input is specified, then the generator matrix of
+			the code $C$ is {\tt G}.
+		Text
+			If the optional input {\tt ParityCheck => true} is specified, then the
+			code $C$ is the dual of the linear code generated by the matrix {\tt G}.
+		Example
+			F = GF 4;
+			L = apply({{1,0,1,0},{0,1,1,1}},codeword ->apply(codeword,entry->sub(entry,F)));
+			M = matrix L
+			C = linearCode(M)
+			C.GeneratorMatrix
+			C.ParityCheckMatrix
+		Text
+			This is an example using the optional argument {\tt ParityCheck=>true}.
+		Example
+			F = GF(4,Variable => a);
+			L = {{1,0,a,0,0},{0,a,a+1,1,0},{1,1,1,a,0}};
+			M = matrix L;
+			C = linearCode(F,L,ParityCheck => true)
+			C.GeneratorMatrix
+			C.ParityCheckMatrix
+    Synopsis
+    	Heading
+		a module is given
+	BaseFunction
+		linearCode
+	Usage
+		linearCode(M)
+	Inputs
+		M:Module
+	Outputs
+		:LinearCode
+			$C$
+	Description
+		Text
+			Given a submodule {\tt M} of a free module {\tt F}$^n$, where $F$ is a Galois field,
+			this function returns a linear code $C$ whose ambient space is {\tt F}$^n$.
+		Text
+			If no optional input is specified, then the code $C$ is generated by the
+			elements of {\tt M}.
+		Text
+			If the optional input {\tt ParityCheck => true} is specified, then the code $C$
+			is the dual of the linear code generated by the elements of {\tt M}.
+		Example
+			F = GF 2; G = transpose matrix {apply({1,1,1,1},entry -> sub(entry,F))};
+			M = image G;
+			C = linearCode(M)
+			C.AmbientModule
+			C.BaseField
+			C.GeneratorMatrix
+			C.ParityCheckMatrix
+    Synopsis
+    	Heading
+		a module and a list are given
+	BaseFunction
+		linearCode
+	Usage
+		linearCode(M,L)
+	Inputs
+		M:Module
+		L:List
+	Outputs
+		:LinearCode
+			$C$
+	Description
+		Text
+			Given a free module {\tt M}$=F^n$, where $F$ is a Galois field,
+			and a non-empty list {\tt L} of vectors of {\tt M}, this function returns a
+			linear code $C$ whose ambient space is $F^n$.
+		Text
+			If no optional input is specified, then the code $C$ is generated by the
+			vectors of {\tt L}.
+		Text
+			If the optional input {\tt ParityCheck => true} is specified, then the code $C$
+			is the dual of the linear code generated by the vectors of {\tt L}.
+		Example
+			F = GF(4,Variable => a); M = F^5; L = {{1,0,a,0,0},{0,a,a+1,1,0},{1,1,1,a,0}};
+			C = linearCode(M,L)
+			C.AmbientModule
+			C.BaseField
+			C.Generators
+			C.GeneratorMatrix
+			C.ParityCheckMatrix
+			C.Code
+		Text
+			This is an example using the optional argument {\tt ParityCheck=>true}.
+		Example
+			F = GF(8,Variable =>a); M = F^4; L = {{a+1,a+1,a+1,a+1}};
+			C = linearCode(M,L,ParityCheck => true)
+			G = C.GeneratorMatrix
+			H = C.ParityCheckMatrix
+    Synopsis
+    	Heading
+		a Galois field and a list are given
+	BaseFunction
+		linearCode
+	Usage
+		linearCode(F,L)
+	Inputs
+		F:GaloisField
+		L:List
+	Outputs
+		:LinearCode
+			$C$
+	Description
+		Text
+			Given a Galois field {\tt F}, and a non-empty list {\tt L}
+			of vectors of the same size and whose entries are coercible into the field {\tt F},
+			this function returns a linear code $C$ over the field {\tt F}.
+		Text
+			If no optional input is specified, then the code $C$ is generated by the
+			vectors of {\tt L}.
+		Text
+			If the optional input {\tt ParityCheck => true} is specified, then the code $C$
+			is the dual of the linear code generated by the vectors of {\tt L}.
+		Example
+			F = GF 4; L = {{1,0,1,0},{1,0,1,0}};
+			C = linearCode(F,L)
+			C.GeneratorMatrix
+			C.ParityCheckMatrix
+		Text
+			This is an example using the optional argument {\tt ParityCheck=>true}.
+		Example
+			F = GF(9,Variable => a); L = {{1,0,a,0,0},{0,a,a+1,1,0},{1,1,1,a,0}};
+			C = linearCode(F,L,ParityCheck => true)
+			C.GeneratorMatrix
+			C.ParityCheckMatrix
+    Synopsis
+    	Heading
+		a Galois field, a positive integer and a list are given
+	BaseFunction
+		linearCode
+	Usage
+		linearCode(F,n,L)
+	Inputs
+		F:GaloisField
+		n:ZZ
+		L:List
+	Outputs
+		:LinearCode
+			$C$
+	Description
+		Text
+			Given a Galois field {\tt F}, a positive integer {\tt n}, and a non-empty list {\tt L}
+			of vectors of size {\tt n} and entries that are coercible into the field {\tt F},
+			this function returns a linear code $C$ of length {\tt n} over the field {\tt F}.
+		Text
+			If no optional input is specified, then the code $C$ is generated by the
+			vectors of {\tt L}.
+		Text
+			If the optional input {\tt ParityCheck => true} is specified, then the code $C$
+			is the dual of the linear code generated by the vectors of {\tt L}.
+		Example
+			F = GF 4; n = 4; L = {{1,0,1,0},{1,0,1,0}};
+			C = linearCode(F,n,L)
+			C.GeneratorMatrix
+			C.ParityCheckMatrix
+		Text
+			This is an example using the optional argument {\tt ParityCheck=>true}.
+		Example
+			F = GF(9,Variable => a); n = 5; L = {{1,0,a,0,0},{0,a,a+1,1,0},{1,1,1,a,0}};
+			C = linearCode(F,n,L,ParityCheck => true)
+			C.GeneratorMatrix
+			C.ParityCheckMatrix
+    Synopsis
+    	Heading
+		a prime number, two positive integers and a list are given
+	BaseFunction
+		linearCode
+	Usage
+		linearCode(p,r,n,L)
+	Inputs
+		p:ZZ
+		r:ZZ
+		n:ZZ
+		L:List
+	Outputs
+		:LinearCode
+			$C$
+	Description
+		Text
+			Given a prime number {\tt p}, positive integers {\tt r} and {\tt n},			
+			and a non-empty list {\tt L} of vectors of size {\tt n} and entries that are
+			coercible into the Galois field {\tt GF}$(\mathtt{p}^\mathtt{r})$,
+			this function returns a linear code $C$ of length {\tt n} over the
+			Galois field {\tt GF}$(\mathtt{p}^\mathtt{r})$.
+		Text
+			If no optional input is specified, then the code $C$ is generated by the
+			vectors of {\tt L}.
+		Text
+			If the optional input {\tt ParityCheck => true} is specified, then the code $C$
+			is the dual of the linear code generated by the vectors of {\tt L}.
+		Example
+			p = 2; r = 2; n=4; L = {{1,0,1,0},{0,1,1,1}};
+			C=linearCode(p,r,n,L)
+			p = 3; r = 2; n = 5;
+			ambient GF(p,r)
+			L = {{1,0,a,0,0},{0,a,a+1,1,0},{1,1,1,a+1,0}};
+			C=linearCode(p,r,n,L)
+///
+
+
+
 
 document {
     Key => ParityCheck,
@@ -2650,248 +2787,296 @@ document {
     PARA{"This symbol is provided by the package ", TO CodingTheory, "."}
     }
 
-document {
-    Key => {weight, (weight, BasicList)},
-    Headline => "The Hamming weight of a list",
-    Usage => "weight(L)",
-    "Returns the number of non-zero entries of the list L.", 
-    "These constructors are provided by the package ", TO CodingTheory, ".",
-    Inputs => {
-	"L" => BasicList => {"A list of numbers from any ring."}
-	},
-    Outputs => {
-	Number => {"The number of nonzero entries of L."}
-	},
-    EXAMPLE {
-	"weight({1,0,1,0,1})",
-	"weight({0, 123, 48, 0, 256})"
-	}
-    }
+doc ///
+    Key
+    	weight
+	(weight, BasicList)
+    Headline
+    	Hamming weight of a list
+    Usage
+    	weight(L)
+    Inputs
+    	L:List
+    Outputs
+    	:ZZ
+    Description
+    	Text
+	    Computes the Hamming weight of a list {\tt L}, which is the number of its non-zero entries.
+	Example
+	    weight({1,0,1,0,1})
+	Example
+	    weight({0,123,48,0,256})
+///
     
-document {
-    Key => {syndromeDecode,(syndromeDecode, LinearCode, Matrix, ZZ)},
-    Headline => "Performs syndrome decoding on a linear code",
-    Usage => "syndromeDecode(C,v,minDist)",
-    "When this function runs, it checks the cache of the LinearCode C for an existing syndrome look-up table. If a look-up table ",
-    "is not found, it automatically generates one. Because of this, the first time this function is called will take longer than subsequent",
-    " calls. If you want to access the look-up table, it can be obtained from C.cache#\"syndromeLUT\".",
-    " The minDist argument only effects the behavior of this function on the first call because it is only used when generating the syndrome",
-    " look-up table.",
-    Inputs => {
-	"C" => LinearCode => {"A linear code."},
-	"v" => Matrix => {"The recieved column vector."},
-	"minDist" => ZZ => {"The minimum distance of the code C."}
-	},
-    Outputs => {
-	List => {"A codeword corresponding to the recieved vector v."}
-	},
-    EXAMPLE {
-	"C = HammingCode(2,3)",
-	"msg = matrix {{1,0,1,0}}",
-	"v = msg*(C.GeneratorMatrix)",
-    	"err = matrix take(random entries basis source v, 1)",
-	"recieved = (transpose (v+err))",
-	"syndromeDecode(C, recieved, 3)"
-	}
-    }
-document {
-    Key => {generatorToParityCheck, (generatorToParityCheck,Matrix)},
-    Headline => "Constructs a parity check matrix given a generator matrix of a linear code over a Galois field",
-    Usage => "generatorToParityCheck(G)",
-    "Given a generator matrix G of a code C over a Galois field, this function constructs a parity check matrix for C. ",
-    "This constructor is provided by the package ", TO CodingTheory, ".",
-    Inputs =>{
-	"G" => Matrix => {"which generates a code over a Galois field."},
-	},
-    Outputs => {
-	Matrix => {"A parity check matrix of the linear code generated by G."}
-	},
-    EXAMPLE {
-	"F = GF 2",
-	"L = {{0,1,1,0},{01,0,1,0},{0,0,0,1}}",
-	"G = matrix apply(L,codeword -> apply(codeword,en -> sub(en,F)))",
-	"H = generatorToParityCheck G",
-	"K = GF(8,Variable => a);",
-	"G = matrix {{1,0,0,a,0,1,1,a},{0,0,0,1,1,1,1,0},{1,1,0,0,0,1,0,0},{1,0,1,0,0,1,1,0}}",
-	"H = generatorToParityCheck G"
-	}
-    }
-document {
-    Key => {parityCheckToGenerator, (parityCheckToGenerator,Matrix)},
-    Headline => "Constructs a generator matrix given a parity check matrix of a linear code over a Galois field",
-    Usage => "parityCheckToGenerator(H)",
-    "Given a parity check matrix H of a linear code C over a Galois field, this function constructs a generator matrix for C. ",
-    "This constructor is provided by the package ", TO CodingTheory, ".",
-    Inputs =>{
-	"H" => Matrix => {"which is the parity check matrix of a linear code over a Galois field."},
-	},
-    Outputs => {
-	Matrix => {"A generator matrix of the linear code generated by H."}
-	},
-    EXAMPLE {
-	"F = GF 2",
-	"H =  matrix apply({{1,1,1,0}},l->apply(l,entry -> sub(entry,F)))",
-	"G = parityCheckToGenerator H",
-	"H* (transpose G)",
-	"F = GF(8,Variable => a)",
-	"H = matrix {{1,0,0,0,1,1,0,0},{0,1,0,0,0,1,1,0},{0,0,1,0,1,0,1,a^2+1},{0,0,0,1,1,0,0,1}}",
-	"G = parityCheckToGenerator H",
-	"H* (transpose G)"
-	}
-    }
+doc ///
+        Key
+               syndromeDecode
+               (syndromeDecode, LinearCode, Matrix, ZZ)
+        Headline
+                syndrome decoding on a code
+        Usage
+                syndromeDecode(C,v,minDist)
+        Inputs
+                C:LinearCode
+	        v:Matrix
+	        minDist:ZZ
+        Outputs
+                :List
+        Description
+                Text  
+			When this function runs, it checks the cache of the
+			{\tt LinearCode} {\tt C} for an existing syndrome look-up
+			table. If a look-up table, is not found, it automatically
+			generates one. Because of
+			this, the first time this function is called will take longer 
+			than subsequent calls. If you want to access the look-up table,  
+			it can be obtained from {\tt C}.cache#\"syndromeLUT\. The 
+			{\tt minDist} argument only effects the behavior of this function 
+			on the first call because it is only used when generating the 
+			syndrome, look-up table. 
+		Example
+			C = hammingCode(2,3);
+			msg = matrix {{1,0,1,0}};
+			v = msg*(C.GeneratorMatrix);
+			err = matrix take(random entries basis source v, 1);
+			received = (transpose (v+err));
+			syndromeDecode(C, received, 3)
+///
 
-document {
-    Key => {zeroCode,(zeroCode,GaloisField,ZZ)},
-    Headline => "Constructs the linear code whose only codeword is the zero codeword",
-    Usage => "zeroCode(F,n)",
-    "This constructor is provided by the package ", TO CodingTheory, ".",
-    Inputs => {
-	"F" => GaloisField => {},
-	"n" => ZZ => {"which is the length of the code."}
-	},
-    Outputs => {
-	LinearCode => {}
-	},
-    EXAMPLE {
-	"F = GF 4; n=7;",
-	"C=zeroCode(F,n)",
-	"C.ParityCheckMatrix",
-	}
-    }
-document {
-    Key => {universeCode,(universeCode,GaloisField,ZZ)},
-    Headline => "Constructs the linear code F^n",
-    Usage => "universeCode(F,n)",
-    "This constructor is provided by the package ", TO CodingTheory, ".",
-    Inputs => {
-	"F" => GaloisField => {},
-	"n" => ZZ => {"which is the length of the code."}
-	},
-    Outputs => {
-	LinearCode => {}
-	},
-    EXAMPLE {
-	"F = GF(2,3); n=7;",
-	"C=universeCode(F,n)",
-	"C.ParityCheckMatrix"
-	}
-    }
-document {
-    Key => {repetitionCode,(repetitionCode,GaloisField,ZZ)},
-    Headline => "Constructs the linear reperition code",
-    Usage => "repetitionCode(F,n)",
-    "These constructor is provided by the package ", TO CodingTheory, ".",
-    Inputs => {
-	"F" => GaloisField => {"A Galois Field."},
-	"n" => ZZ => { "which is the length of the code."}
-	},
-    Outputs => {
-	LinearCode => {}
-	},
-    EXAMPLE {
-	"F = GF(2,3); n=7;",
-	"C=repetitionCode(F,n)",
-	"C.ParityCheckMatrix"
-	}
-    }
-document {
-    Key => {zeroSumCode, (zeroSumCode,GaloisField,ZZ)},
-    Headline => "Constructs the linear code in which the entries of each codeword add up zero",
-    Usage => "zeroSumCode(F,n)",
-    "The zero sum code equals the dual of the linear repetition code.\n",
-    "In the binary case, this code equals the code of all even-weight codewords.\n",
-    "This constructor is provided by the package ", TO CodingTheory, ".",
-    Inputs => {
-	"F" => GaloisField => {},
-	"n" => ZZ => {"which is the length of the code."}
-	},
-    Outputs => {
-	LinearCode => {}
-	},
-    EXAMPLE {
-	"D=zeroSumCode(GF 3,5)",
-	"D.ParityCheckMatrix",
-	"E = zeroSumCode(GF 8,5)",
-	"E.ParityCheckMatrix"
-	}
-    }
-document {
-    Key => {reduceMatrix, (reduceMatrix, Matrix)},
-    Headline => "Given any matrix, compute the equivalent reduced matrix",
-    Usage => "reduceMatrix(Matrix)",
-    "If generator or parity check matrix is not full rank, this funtion choose a subset of rows that are generators.",
-    Inputs => {
-    "M" => Matrix => {"A matrix."}
-          },
-    Outputs => {
-          Matrix => {"The equivalente reduce matrix of M."}
-           },
-      EXAMPLE {
-       "F = GF(4)",
-       "n = 7",
-       "k = 3",
-       "L = apply(toList(1..k),j-> apply(toList(1..n),i-> random(F)))",
-       "m=matrix(L)",
-       "reduceMatrix(m)",      
-           }
-      }
-document {
-    Key => {bitflipDecode, (bitflipDecode,Matrix, Vector, ZZ)},
-    Headline => "An experimental implementation of a message passing decoder",
-    Usage => "bitflipDecode(H,v)",
-    Inputs => {
-	"H" => Matrix => {"The parity check matrix."},
-	"v" => Vector => {"The codeword to decode."},
-	"maxI" => ZZ => {"The maximum number of iterations before failure."}	
-	},
-    Outputs => {
-	List => {"The resulting codeword."}
-	},
-    "Attempts to decode the vector v relative to the parity check matrix H using a message passing decoding algorithm. The matrix H and the vector v must have entries in GF(2). Returns the empty list if maxI is exceeded. ",
-    "At each iteration, this function flips all the bits of v that fail the maximum number of parity check equations from H. This is experimental because it has not been fully tested. The output is only guarenteed to be a codeword of the code defined by H.",
-    EXAMPLE {
-	"R=GF(2);",
-	"H := matrix(R, {{1,1,0,0,0,0,0},{0,1,1,0,0,0,0},{0,1,1,1,1,0,0},{0,0,0,1,1,0,0},{0,0,0,0,1,1,0},{0,0,0,0,1,0,1}});",
-	"v := vector transpose matrix(R, {{1,0,0,1,0,1,1}});",
-	"bitflipDecode(H,v,100)"
-	}
-    }
-document {
-    Key => {tannerGraph, (tannerGraph,Matrix)},
-    Headline => "Outputs the Tanner graph associated with the given parity check matrix",
-    Usage => "tannerGraph(H)",
-    Inputs => {
-	"H" => Matrix => {"The parity check matrix."}
-      	},
-    Outputs => {
-	Graphs$Graph => {}
-	},
-    "Calculates the bipartite Tanner graph of the parity check matrix H.",
-    EXAMPLE {
-	"H := matrix(GF(2), {{1,1,0,0,0,0,0},{0,1,1,0,0,0,0},{0,1,1,1,1,0,0},{0,0,0,1,1,0,0},{0,0,0,0,1,1,0},{0,0,0,0,1,0,1}});",
-	"tannerGraph(H)"
-	}
-    }
+doc ///
+    Key
+    	parityCheckToGenerator
+	(parityCheckToGenerator, Matrix)
+    Headline
+    	generator matrix given a parity check matrix
+    Usage
+    	parityCheckToGenerator H
+    Inputs
+    	H:Matrix
+    Outputs
+    	:Matrix
+	    $G$
+    Description
+	Text
+	    Given parity check matrix {\tt H} of a code $C$, this function
+	    recovers a generator matrix {\tt G} of $C$.
+	Example
+	    F = GF 2;
+	    H = matrix apply({{1,1,1,0}},l->apply(l,entry->sub(entry,F)))
+	    G = parityCheckToGenerator H
+	    H*(transpose G)
+	Example
+	    F = GF(8,Variable => a);
+	    H = matrix{{1,0,0,0,1,1,0,0},{0,1,0,0,0,1,1,0},{0,0,1,0,1,0,1,a^2+1}}
+	    G = parityCheckToGenerator H
+	    H*(transpose G)
+///
 
-document {
-    Key => {HammingCode, (HammingCode,ZZ,ZZ)},
-    Headline => "Generates the Hamming code over GF(q) and dimension of the dual s",
-    Usage => "HammingCode(q,s)",
-    Inputs => {
-	"q" => ZZ => {"Size of the field."},
-	"s" => ZZ => {"Dimension of the dual of the Hamming code."}	
-	},
-    Outputs => {
-	"C" => LinearCode => {"Hamming code."}
-	},
-    "Returns the Hamming code over GF(q) and dimension of the dual s.",
-    EXAMPLE {
-	"C1= HammingCode(2,3);",
-	"C1.ParityCheckMatrix",
-	"C2= HammingCode(2,3);",
-	"C2.ParityCheckMatrix"
-	}
-    }
+doc ///
+    Key
+    	zeroCode
+	(zeroCode,GaloisField,ZZ)
+    Headline
+    	zero code
+    Usage
+    	zeroCode(F,n)
+    Inputs
+    	F:GaloisField
+	n:ZZ
+    Outputs
+    	:LinearCode
+    Description
+    	Text
+	    Constructs the linear code of length {\tt n} over {\tt F}
+	    whose only codeword is the zero codeword.
+	Example
+	    C=zeroCode(GF(4),7)
+	    C.GeneratorMatrix
+///
+
+doc ///
+        Key
+               universeCode
+               (universeCode,GaloisField,ZZ)
+        Headline
+                linear code $\mathtt{F}^\mathtt{n}$
+        Usage
+                universeCode(F,n)
+        Inputs
+                F:GaloisField
+                n:ZZ
+        Outputs
+                :LinearCode
+                           
+        Description
+                Text  
+			Returns the code with largest dimension such that
+			its length is {\tt n} and the entries of its codewords
+			are in the field {\tt F}.
+		Example
+			    F = GF(2,3); 
+                            n=7;
+	                    C=universeCode(F,n)
+	                    C.ParityCheckMatrix
+///
+
+doc ///
+	Key
+		repetitionCode
+		(repetitionCode,GaloisField,ZZ)
+	Headline
+		repetition code  
+	Usage
+		repetitionCode(F,n)
+	Inputs
+		F:GaloisField
+		n:ZZ
+	Outputs
+		:LinearCode
+	Description
+		Text
+                        Returns the repetition over {\tt F} of length {\tt n}.
+		Example
+			F = GF(2,3); 
+			n=7;
+			C=repetitionCode(F,n);
+			C.ParityCheckMatrix
+///
+
+doc ///
+    Key
+    	zeroSumCode
+	(zeroSumCode,GaloisField,ZZ)
+    Headline
+    	linear code in which the entries of each codeword add up zero
+    Usage
+    	zeroSumCode(F,n)
+    Inputs
+    	F: GaloisField
+	n: ZZ
+    Outputs
+    	:LinearCode
+	    $C$
+    Description
+    	Text
+	    Returns the code $C$ of length {\tt n} over {\tt F} such that for any
+            $c\in C$, $\sum_{i=1}^n c_i=0$. The dual of the code $C$ is the repetition
+	    code. In the binary case, this code $C$ equals the code of all even-weight codewords.
+	Example
+	    D = zeroSumCode(GF 3,5)
+	Example
+	    E = zeroSumCode(GF 8,5)
+///
+
+doc ///
+	Key
+		reduceMatrix
+		(reduceMatrix, Matrix)
+	Headline
+		reduced matrix
+	Usage
+		reduceMatrix(Matrix)
+	Inputs
+		M:Matrix
+	Outputs
+		:Matrix
+			
+	Description
+		Text
+			Returns the reduced matrix of {\tt M}.
+		Example
+			F = GF(4);
+			n = 7;
+			k = 3;
+			L = apply(toList(1..k),j-> apply(toList(1..n),i-> random(F)));
+			m=matrix(L)
+			reduceMatrix(m)
+///
+
+doc ///
+	Key
+		bitflipDecode
+		(bitflipDecode, Matrix, Vector, ZZ)
+	Headline
+		an experimental implementation of a message passing decoder
+	Usage
+		bitflipDecoder(H,v,maxI)
+	Inputs
+		H:Matrix
+		v:Vector
+                maxI:ZZ
+	Outputs
+		:List
+	Description
+		Text
+			Attempts to decode the vector {\tt v} relative to the parity check
+			matrix {\tt H} using a message passing decoding algorithm. The
+			matrix {\tt H} and the vector {\tt v} must have entries in
+			{\tt GF(2)}. Returns the empty list if {\tt maxI} is exceeded.
+
+		Text
+			At each iteration, this function flips all the bits of {\tt v}
+			that fail the maximum number of parity check equations from {\tt H}.
+			This is experimental because it has not been fully tested. The
+			output is only guaranteed to be a codeword of the code defined by
+			{\tt H}.
+    
+		Example
+			R=GF(2);
+	                H := matrix(R, {{1,1,0,0,0,0,0},{0,1,1,0,0,0,0},{0,1,1,1,1,0,0},{0,0,0,1,1,0,0},{0,0,0,0,1,1,0},{0,0,0,0,1,0,1}});
+	                v := vector transpose matrix(R, {{1,0,0,1,0,1,1}});
+	                bitflipDecode(H,v,100)
+///
+
+doc ///
+        Key
+               tannerGraph
+               (tannerGraph,Matrix)
+        Headline
+                outputs the tanner graph associated with the given parity check matrix
+        Usage
+                tannerGraph(H)
+        Inputs
+                H:Matrix
+        Outputs
+                :Graphs$Graph
+        Description
+                Text  
+			Given a linear code $C$ with parity-check matrix {\tt H},
+			the function returns the Tanner graph associated to {\tt H}.
+			This is a bipartite graph composed by two sets of vertices and
+			edges between these two sets. One set of vertices is indexed
+			by the rows of {\tt H}. The another set of vertices is indexed
+			by the columns of {\tt H}. An edge connects a row  $i$ and a
+			column $j$ if the corresponding entry $(i,j)$ of {\tt H}
+			is nonzero.
+		Example
+			  H := matrix(GF(2), {{1,1,0,0,0,0,0},{0,1,1,0,0,0,0}, {0,1,1,1,1,0,0},{0,0,0,1,1,0,0},{0,0,0,0,1,1,0},{0,0,0,0,1,0,1}});
+                          tannerGraph(H)
+///
+
+doc ///
+    Key
+    	hammingCode
+	(hammingCode,ZZ,ZZ)
+    Headline
+    	generates a Hamming code
+    Usage
+    	hammingCode(q,s)
+    Inputs
+    	q: ZZ
+	s: ZZ
+    Outputs
+       	: LinearCode
+	    $C$
+    Description
+    	Text
+	    Returns the Hamming code $C$ over {\tt GF(q)} whose dual
+	    has dimension {\tt s}.
+    	Example
+	    C1 = hammingCode(2,3);
+	    C1.ParityCheckMatrix
+///
 
 doc ///
    Key
@@ -2934,64 +3119,66 @@ doc ///
 	Key
 		(random, GaloisField, ZZ, ZZ)
 	Headline
-		a random linear code
+		constructs a random linear code over a finite field
 	Usage
 		random(F,n,k)
 	Inputs
 		F:GaloisField
 		n:ZZ
-			an integer $n$ as the length of the code. 
 		k:ZZ
-			an integer $k$ as the dimension of the code.
 	Outputs
-		C:LinearCode
-			A random linear code of length $n$ and dimension at most $k$. 
+		:LinearCode
+			$C$
 	Description
+		Text
+		    Given a finite field {\tt F} and positive integers {\tt n} and {\tt k},
+		    returns a random linear code $C$ over {\tt F} of length $n$ and dimension at most $k$.
 		Example
 			F = GF(2, 4)
-			C = random ( F , 3, 5 )
+			C = random ( F , 5, 3 )
 ///
 
 doc ///
-    Key
-       (random, QuotientRing, ZZ, ZZ)
-    Headline
-    	A random linear code
-    Usage
-    	random(QuotientRing, ZZ, ZZ)
-    Inputs
-    	R: QuotientRing
-	n: ZZ
-	    an integer $n$ as the length of the code.
-	k: ZZ
-	    an integer $k$ as the dimension of the code.
-    Outputs
-    	C:LinearCode
-	    A random linear code of length $n$ and dimension at most $k$ over $R$.
-    Description
-    	Example
-	    R = ZZ/3
-	    C = random ( R, 5 , 3 )
-///    
-
+	Key
+		(random, QuotientRing, ZZ, ZZ)
+	Headline
+		constructs a random linear code over a quotient ring
+	Usage
+		random(QR,n,k)
+	Inputs
+		QR:QuotientRing
+		n:ZZ
+		k:ZZ
+	Outputs
+		:LinearCode
+			$C$
+	Description
+		Text
+		    Given a quotient ring {\tt QR} and positive integers {\tt n} and {\tt k},
+		    returns a random linear code $C$ over {\tt QR} of length $n$ and dimension at most $k$.
+		Example
+			QR = ZZ/3
+			C = random ( QR , 5, 3 )
+///
 
 
 doc ///
    Key
        (ring, LinearCode)
    Headline
-       The ring that contains the entries of the generator matrix of C
+       the ring of a code
    Usage
        ring(LinearCode)
    Inputs
         C:LinearCode
-	    the linear code $C$.
    Outputs
        :Ring
-            The ring that contains the entries of the generator matrix of C. 
    Description
+       Text
+       	   Given a code {\tt C}, returns the ring that contains the entries of the
+	   generator matrix of {\tt C}.
        Example
-       	   C = HammingCode(2, 3)
+       	   C = hammingCode(2, 3)
 	   ring(C)
 ///
 
@@ -3046,61 +3233,97 @@ doc ///
 
 
 
-document {
-    Key => {minimumWeight, (minimumWeight, LinearCode)},
-    Headline => "Computes the minimum weight of a linear code",
-    Usage => "minimumWeight(C)",
-    "Returns the minimum weight of a non-zero codeword of the linear code C. The linear code C may be over any finite field.\n",
-    "NOTE: To the best of our knowledge, the algorithm is implemented well. Unfortunately sometimes it is slow. ",
-    "It may be because it depends on the Matroid package or an error in the implementation.",
-    Inputs => {
-	"C" => LinearCode => {"The linear code whose minimum distance to compute."}
-	},
-    Outputs => {
-	ZZ => {"The minimum weight of the given linear code."}
-	},
-    EXAMPLE {
-	"minimumWeight(HammingCode(2,3))"
-	}
-    }
+doc ///
+    Key
+    	minimumWeight
+	(minimumWeight,LinearCode)
+    Headline
+    	computes the minimum weight of a linear code
+    Usage
+    	minimumWeight C
+    Inputs
+    	C: LinearCode
+    Outputs
+    	:ZZ
+    Description
+    	Text
+	    The weight of a codeword is the number of
+	    its non-zero entries. This function returns the minimum weight of {\tt C}, which is
+	    the minimum of the weights of all the codewords in {\tt C}.
+	Example
+	    minimumWeight(hammingCode(2,3))
+    Caveat
+    	To the best of our knowledge, the algorithm is implemented well. Unfortunately sometimes it is slow.
+	It may be because it depends on the Matroid package or an error in the implementation.
+///
+-*
+doc ///
+	Key
+		Strategy
+	Headline
+		Optional input for the {\tt minimumWeight} function
+	Usage
+		minimumWeight(...,Strategy=>...)
+    	Description
+	    Text
+	    	Values for {\tt Strategy} are {\tt MatroidPartition} and {\tt BruteForce}.
+		If no {\tt Strategy} is specified, the function tries to guess which one to use.
+	    Example
+	    	minimumWeight(hammingCode(2,3),Strategy => BruteForce)
+///
+*-
+doc ///
+        Key
+               shortestPath
+               (shortestPath, Digraph, Thing, List)
+        Headline
+                shorthest path in a digraph
+        Usage
+                shortestPath(D,start,finishSet)
+        Inputs
+                D:Digraph
+	        start:Thing
+	        finishSet:List
+        Outputs
+                :List
+        Description
+                Text  
+			Given a digraph {\tt D}, a vertex {\tt start} in {\tt D}, and
+			a list of vertices {\tt finishSet} of {\tt D}, this function
+			returns the shortest path in {\tt D} from {\tt start} to
+			{\tt finishSet}.
+		Text
+                        It is safe to use this in applications that have nothing to do     
+                        with coding theory.
+		Example
+			D = digraph({x,y,z,u,v}, matrix {{0,1,0,1,0},{0,0,1,0,0},{0,0,0,1,1},{0,0,0,0,0},{0,0,0,0,0}});
+	                shortestPath (D,x,{z,v})
+///
 
-document {
-    Key => {shortestPath, (shortestPath, Digraph, Thing, List)},
-    Headline => "Shorthest path in a digraph",
-    Usage => "shortestPath (D,start,finishSet)",
-    "Finds the shorthest path between a vertex and a set of vertices in a digraph.",
-    Inputs => {
-	"D" => Digraph => {"A digraph."},
-	"start" => Thing => {"A vertex."},
-	"finishSet" => List => {"List of vertices."}
-	},
-    Outputs => {
-	List => {"The shorthest path in D from start to finishSet."}
-	},
-    EXAMPLE {
-	"D = digraph ({x,y,z,u,v}, matrix {{0,1,0,1,0},{0,0,1,0,0},{0,0,0,1,1},{0,0,0,0,0},{0,0,0,0,0}})",
-	"shortestPath (D,x,{z,v})"
-	}
-    }
+doc ///
+	Key
+		enumerateVectors
+		(enumerateVectors, Ring, List)
+	Headline
+		a particular way to enumerate vectors over a finite field
+	Usage
+		enumerateVectos(F, L)
+	Inputs
+		L:List
+		F:GaloisField
+	Outputs
+		:List
+	Description
+		Text
+			Given a $0$, $1$ valued list {\tt L}, this function returns
+			the list with all the possible ways to replace the
+			one values in {\tt L}, with a nonzero element of the
+			finite field {\tt F}.
+		Example
+			F = GF(3);
+	                enumerateVectors(F, {1,0,1,0,1})
+///
 
-document {
-    Key => {enumerateVectors, (enumerateVectors, Ring, List)},
-    Headline => "A way to enumerate vectors over a finite field with a given set of non-zero coordinates",
-    Usage => "enumerateVectors(F, L)",
-    "Given a 0,1 valued list L, return a list of all the possible ways to replace the",
-    " one values in L with a nonzero element of the finite field F.",
-    Inputs => {
-	"F" => Ring => {"The finite field of the resulting lists entries."},
-	"L" => List => {"A 0,1 valued list."}
-	},
-    Outputs => {
-	List => {"A list of lists that correspond to all possible vectors over F that have the same set of nonzero entries as L."}
-	},
-    EXAMPLE {
-	"F = GF(3);",
-	"enumerateVectors(F, {1,0,1,0,1})"
-	}
-    } 
 document {
     Key => {randLDPC, (randLDPC, ZZ, ZZ, RR, ZZ)},
     Headline => "Generates a low density family of parity check matrices with given parameters",
@@ -3120,25 +3343,35 @@ document {
     EXAMPLE {
 	"randLDPC(10,5,3.0,0)"
 	}
- }  
-document {
-   Key => {randNoRepeats, (randNoRepeats,ZZ,ZZ)},
-   Headline => "Generates a list of random integers from a specified range with no repitions",
-   Usage => "randNoRepeats(n,k)",
-   Inputs => {
-	"n" => ZZ => {"The maximum possible value in the random list."},
-	"k" => ZZ => {"The number of random integers to generate."}
-	},
-   Outputs => {
-       "L" => List => {"A list of k random integers between 0 and n (inclusive) with no repeats."}
-	},
-    "It is safe to use this in applications that have nothing to do with coding theory.",
-	EXAMPLE {
-	"randNoRepeats(10,4)",
-	"randNoRepeats(0,1)",
-        "randNoRepeats(25,5)"
-	}
- }  
+ } 
+
+doc ///
+	Key
+		randNoRepeats
+		(randNoRepeats,ZZ,ZZ)
+	Headline
+	         list of random integers from a specified range with no repetitions  
+	Usage
+		randNoRepeats(n,k)
+	Inputs
+		n:ZZ 
+	        k:ZZ
+	Outputs
+		:List
+			
+	Description
+		Text
+			Given the integers {\tt k} and {\tt k}, this function returns a
+			list of {\tt k} random integers between $0$ and {\tt n}
+			(inclusive) with no repetitions.
+		Text
+                        It is safe to use this in applications that have nothing to do     
+                        with coding theory.
+		Example
+			randNoRepeats(10,4)
+			randNoRepeats(0,1)
+			randNoRepeats(25,5)
+///
 
 document {
    Key => {vNumber, (vNumber,Ideal)},
@@ -3251,168 +3484,215 @@ document {
 	}
  }
 
+doc ///
+	Key
+		alphabet
+		(alphabet,LinearCode)
+	Headline
+		elements of the base ring of a code
+	Usage
+		alphabet(C)
+	Inputs
+		C:LinearCode
+	Outputs
+		:List
+	Description
+		Text
+			Given a linear code {\tt C}, the function returns
+			all the elements of the ring that contains the entries of the
+			generator matrix of {\tt C}.
+		Example
+			F=GF(4, Variable=>a);
+			C=linearCode(matrix{{1,a,0},{0,1,a}});
+    	    	    	alphabet(C)
+///
 
 
-document {
-    
-    Key => {alphabet, (alphabet, LinearCode)},
-    
-    Headline => "Recover all the elements of the base ring",
-    
-    Usage => "alphabet(C)",
-    
-    Inputs => {
-    "C" => LinearCode => {"The code over the ring which forms the alphabet."}
-    },
-    
-    Outputs => {
-    List => {"A list of the base ring elements."}
-    },
-    "Checks if the base ring is ZZ/p and then computes the elements of the ring additively, otherwise computes them by taking a generator of the multiplicative group.",
-    
-    EXAMPLE {
-    "F=GF(4, Variable=>a);",
-    "C=linearCode(matrix{{1,a,0},{0,1,a}});",
-    "alphabet(C)"
-    }
-    }
-document {
-    Key => {ambientSpace, (ambientSpace, LinearCode)},
-    
-    Headline => "Recover the ambient module the code is subspace of",
-    
-    Usage => "ambientSpace C",
-    
-    Inputs => {
-    "C" => LinearCode => {"The code, a subspace of the ambient space."}
-    },
-    Outputs => {
-    Module => {"The space of the code."}
-    },
-    
-    "Extract the key AmbientModule of the hash table LinearCode.",
-    
-    EXAMPLE {
-    "F=GF(4,Variable=>a)",
-    "C=linearCode(matrix{{1,a,0},{0,1,a}})",
-    "ambientSpace C"
-    }
-    }
-document {
-    Key => {codewords, (codewords, LinearCode)},
-    
-    Headline => "Compute all the codewords of the code",
-    
-    Usage => "codewords(C)",
-    
-    Inputs => {
-    "C" => LinearCode => {"The linear code to extract the codewords of."}
-    },
-    
-    Outputs =>{
-    List => {"The list of the codewords in C."}
-    },
-    
-    "Obtain the codewords by multiplying all the elements of the ambient space (obtained with the function messages) by the generator matrix of the code C.",
-    
-    EXAMPLE {
-    "F=GF(4,Variable=>a)",
-    "C=linearCode(matrix{{1,a,0},{0,1,a}})",
-    "codewords(C)"
-    }
-    }
-document {
-    Key => {cyclicMatrix, (cyclicMatrix,List),(cyclicMatrix, GaloisField,List)},
-    
-    Headline => "The cyclic matrix generated by a vector",
-    
-    Usage => "M=cyclicMatrix(v)\n M=cyclicMatrix(F,v)",
-    
-    Inputs => {
-    "v" => List => {"A tuple of elements with works as the first row of the cyclic matrix."},
-    "F" => GaloisField => {"The field where the matrix will have its entries."}
-    },
-    
-    Outputs => {
-    Matrix => {"A cyclic matrix generated by v."}
-    },
-    
-    "A cyclic matrix (also known as circulant matrix) is a matrix generated by the cyclic permutations of the first row of it. This function computes the matrix by taking as the i-th row the entries of v list from -i to n-i module n.",
-    
-    EXAMPLE {
-    "F=GF(4,Variable=>a)",
-    "v={0,1,a}",
-    "M=cyclicMatrix(F,v)"
-    }
-    }
-document {
-    Key => {dualCode, (dualCode,LinearCode)},
-    
-    Headline => "Compute the dual of a given code",
-    
-    Usage => "D=dualCode(C)",
-    
-    Inputs => {
-    "C" => LinearCode => {"A linear code of dimension k and length n."}
-    },
-    
-    Outputs => {
-    LinearCode => {"The dual of C, a code of dimension n-k."}
-    },
-    
-    "The dual of a code C of length n over the field F are the elements v in F^n such that for any c in C, the inner product <c,v> is equal to zero. These are the functionals whose image are zero over the code, this is the dual module of F^n/C.",
-    
-    EXAMPLE {
-    "F=GF(4,Variable=>a)",
-    "C=linearCode(matrix{{1,a,0},{0,1,a}})",
-    "D=dualCode(C)"
-    }
-    }
- 
-document {
-    
-    Key => {field,(field,LinearCode)},
-    
-    Headline => "Returns the field where the entries of the codewords belong.",
+doc ///
+	Key
+		ambientSpace
+		(ambientSpace,LinearCode)
+	Headline
+		recover the ambient module the code is subspace of
+	Usage
+		ambientSpace C
+	Inputs
+		C: LinearCode
+	Outputs
+		:Module
+	Description
+		Text
+			Given a code {\tt C} over the field $F$ of length $n$, this function
+			extracts the key {\tt AmbientModule} of the hash table {\tt LinearCode} and
+			returns $F^n.$
+		Example
+			F=GF(4,Variable=>a);
+                        C=linearCode(matrix{{1,a,0},{0,1,a}});
+                        ambientSpace C
+///
 
-    
-    Usage => "field C",
-    
-    Inputs => {
-    "C" => LinearCode => {}
-    },
-    
-    Outputs => {
-    Ring => {"The base field of the code."}
-    },
-    
-    "Return the base field of the code.",  
-    
-    EXAMPLE {
-    "F=GF(4,Variable=>a)",
-    "C=linearCode(matrix{{1,a,0},{0,1,a}})",
-    "field C"
-    }
-    }
-document {
-    
-    Key => {genericCode, (genericCode, LinearCode)},
-    Headline => "Given a code, computes its ambient space as a code",
-    Usage => "genericCode(C)",
-    Inputs => {
-    "C" => LinearCode => {}
-    },
-    Outputs => {
-    LinearCode => {"The linear code generated by the identity matrix."}
-    },
-    "Given a F-code $C$ of length $n$, return the code $F^n$.",
-    
-    EXAMPLE {
-    "F=GF(4,Variable=>a)",
-    "C=linearCode(matrix{{1,a,0},{0,1,a}})",
-    "genericCode(C)"
-    }
-    }
+doc ///
+	Key
+		codewords
+		(codewords, LinearCode)
+	Headline
+		codewords of the code
+	Usage
+		codewords(C)
+	Inputs
+		C:LinearCode
+	Outputs
+		:List
+	Description
+		Text
+			Obtains all the codewords of a code {\tt  C} by multiplying all
+			the elements of the ambient space (obtained with the function
+			messages) by the generator matrix of {\tt C}.
+
+		Example
+			F=GF(4,Variable=>a);
+			C=linearCode(matrix{{1,a,0},{0,1,a}});
+			codewords(C)
+///
+
+doc ///
+	Key
+		cyclicMatrix
+		(cyclicMatrix, List)
+		(cyclicMatrix, GaloisField, List)
+	Headline
+		cyclic matrix
+	Usage
+		cyclicMatrix(v)
+		cyclicMatrix(F,v)
+	Inputs
+		v:List
+		F:GaloisField
+	Outputs
+		:Matrix 
+                         $M$
+		
+	Description
+		Text
+			A cyclic matrix (also known as circulant matrix) is a matrix
+			generated by the cyclic permutations of the first row of it.			
+			We present below different ways to define a cyclic Matrix $M$.
+    Synopsis
+    	Heading
+		a list is given
+	BaseFunction
+		cyclicMatrix
+	Usage
+		cyclicMatrix(v)
+	Inputs
+		v:List
+	Outputs
+		:Matrix
+			$M$
+	Description
+		Text
+			Assume that $v_1,\ldots,v_n$ are the entries of {\tt v}. The
+			output is an $n\times n$ matrix. The entries of row 1 are
+			$v_1,\ldots,v_n$, the entries of row 2 are $v_2,\ldots,v_n,v_1$,
+			in general,
+			the entries of row $i$ are $v_i,\ldots,v_n,v_1,\ldots, v_{i-1}$.
+		Example
+			v=toList(1,0,2,0);
+			M =cyclicMatrix(v)            
+    Synopsis
+    	Heading
+		a finite field and a list are given
+	BaseFunction
+		cyclicMatrix
+	Usage
+		cyclicCode(v,F)
+	Inputs
+		v:List
+		F:GaloisField
+	Outputs
+		:Matrix
+			$M$
+	Description	    
+		Text
+			Assume that $v_1,\ldots,v_n$ are the entries of {\tt v}. The
+			output is an $n\times n$ matrix over {\tt F}. The entries of
+			row 1 are $v_1,\ldots,v_n$, the entries of row 2 are $v_2,\ldots,v_n,v_1$,
+			in general,
+			the entries of row $i$ are $v_i,\ldots,v_n,v_1,\ldots, v_{i-1}$.
+		Example
+			F=GF(4,Variable=>a);
+                        v={0,1,a};
+                        M=cyclicMatrix(F,v)                     
+///
+
+doc ///
+	Key
+		dualCode
+		(dualCode,LinearCode)
+	Headline
+		dual of a code
+	Usage
+		dualCode(C)
+	Inputs
+		C:LinearCode
+	Outputs
+		:LinearCode
+	Description
+		Text    
+			The dual of a code {\tt C} of length $n$ over the field $F$ is the code
+			whose codewords are the elements $v$ in $F^n$ such that for any $c$ in {\tt C},
+			the inner product $<c,v>$ is equal to zero. This function returns
+			the dual of {\tt C}.																																																																																																																																																																																																																																																																																																																																																																																																																																								
+		Example
+			F=GF(4,Variable=>a);
+                        C=linearCode(matrix{{1,a,0},{0,1,a}});
+                        D=dualCode(C)
+///
+
+
+doc ///
+	Key
+		field
+		(field, LinearCode)
+	Headline
+		the field of a code
+	Usage
+		field (C)
+	Inputs
+		C:LinearCode
+	Outputs
+		:Ring
+	Description
+		Text
+			Given a code {\tt C}, returns the field (or ring) that contains
+			the entries of the generator matrix of {\tt C}.
+		Example
+			F=GF(4,Variable=>a);
+			C=linearCode(matrix{{1,a,0},{0,1,a}});
+			field C
+///
+
+doc ///
+    Key
+    	genericCode
+	(genericCode, LinearCode)
+    Headline
+    	ambient space of a code
+    Usage
+    	genericCode(C)
+    Inputs
+    	C:LinearCode
+    Outputs
+    	:LinearCode
+    Description
+    	Text
+	    Given a code {\tt C} over a finite field $F$ of length $n$,
+	    returns the code $F^n$.
+	Example
+	    F=GF(4,Variable=>a);
+	    C=linearCode(matrix{{1,a,0},{0,1,a}})
+	    genericCode(C)
+///
 
 document {
     Key => {(dim,LinearCode)},
@@ -3428,45 +3708,45 @@ document {
     EXAMPLE {
 	"C = linearCode(GF(2),{{1,1,0,0},{0,0,1,1}})",
 	"dim C",
-	"H = HammingCode(2,3)",
+	"H = hammingCode(2,3)",
 	"dim H",
 	},
     "We show next the usage od this method to compute the dimension of Evaluation Codes.",
     EXAMPLE {
-	"RM = RMCode(2,2,1);",
+	"RM = reedMullercode(2,2,1);",
 	"dim(RM.LinearCode)"
 	},
     PARA{"This method is provided by the package ", TO CodingTheory, "."},
     }
 
-document {
-    Key => {informationRate,(informationRate,LinearCode)},
-    Headline => "Gives the information rate of a linear code",
-    Usage => "informationRate C",
-    Inputs => {
-	"C" => LinearCode => {"A linear code over a Galois field."},
-	},
-    Outputs => {
-	QQ => {"The information rate of the linear code C."},
-	},
-    "Given a linear code C of length n and dimension k over a Galois field F, it computes the information rate of C: k/n.",
-    EXAMPLE {
-	"R = linearCode(GF(4),{{1,1,1,1}});",
-	"informationRate R",
-	"H = HammingCode(2,3);",
-	"informationRate H",
-	"F = GF(4,Variable=>a);",
-	"L = {{1,a,a+1},{a+1,1,a},{a,a+1,1},{0,0,0}};",
-	"C = linearCode(F,L);",
-	"informationRate C",
-	},
-    "The next is an example for the class of Evalation Codes.",
-    EXAMPLE {
-	"RM = RMCode(2,3,1);",
-	"informationRate(RM.LinearCode)"
-	},
-    PARA{"This method is provided by the package ", TO CodingTheory, "."},
-    }
+doc ///
+    Key
+    	informationRate
+    	(informationRate,LinearCode)
+    Headline
+    	information rate of a code
+    Usage
+    	informationRate C
+    Inputs
+    	C: LinearCode
+    Outputs
+    	:QQ
+    Description
+    	Text
+	    Given a linear code {\tt C} of length $n$ and dimension $k$, this function returns
+	    the number $\frac{k}{n}$, which is known as the information rate of {\tt C}.
+	Example
+	    C=linearCode(GF(4),{{1,1,1,1}});
+	    informationRate C
+	Example
+	    H=hammingCode(2,3);
+	    informationRate H
+    	Text
+	    The next is an example for the class of @TO EvaluationCode@.
+	Example
+	    RM=reedMullercode(2,3,1);
+	    informationRate(RM.LinearCode)
+///
 
 document {
     Key => {(size,LinearCode)},
@@ -3482,7 +3762,7 @@ document {
     EXAMPLE {
 	"R = linearCode(GF(4),{{1,1,1,1}});",
 	"size R",
-	"H = HammingCode(2,3);",
+	"H = hammingCode(2,3);",
 	"size H",
 	"F = GF(4,Variable=>a);",
 	"L = {{1,a,a+1},{a+1,1,a},{a,a+1,1},{1,0,1}};",
@@ -3491,7 +3771,7 @@ document {
 	},
     "The next is an example of how to use the size method for Evaluation Codes.",
     EXAMPLE {
-	"RM = RMCode(2,2,4);",
+	"RM = reedMullercode(2,2,4);",
         "size(RM.LinearCode)"
 	},
     PARA{"This method is provided by the package ", TO CodingTheory, "."},
@@ -3512,139 +3792,179 @@ document {
     EXAMPLE {
 	"R = linearCode(GF(4),{{1,1,1,1}});",
 	"length R",
-	"H = HammingCode(2,3);",
+	"H = hammingCode(2,3);",
 	"length H"
 	},
     "The next example illustrates how to use this method for the class of Evaluation Codes.",
     EXAMPLE {
-	"RM = RMCode(2,3,1);",
+	"RM = reedMullercode(2,3,1);",
 	"length(RM.LinearCode)",
 	},
     PARA{"This method is provided by the package ", TO CodingTheory, "."},
     }
 
-document {
-    Key => {vectorSpace, (vectorSpace,LinearCode)},
-    Headline => "Vector space generated by a generator matrix of a linear code",
-    Usage => "vectorSpace C",
-    Inputs => {
-	"C" => LinearCode => {"A linear code over a Galois field."},
-	},
-    Outputs => {
-	Module => {"The vector space generated by a generator matrix of C."},
-	},
-    "Given a linear code C over a Galois Field, say F, with generator matrix G, it construct the vector space over F generated by the rows of G.",
-    EXAMPLE {
-	"H = HammingCode(2,3);",
-	"vectorSpace(H)",
-	},
-    "The next is an example of how to use the vectorSpace method for the class of Evaluation Codes.",
-    EXAMPLE {
-	"RM = RMCode(2,4,1)",
-        "vectorSpace(RM.LinearCode)"
-	},
-    PARA{"This method is provided by the package ", TO CodingTheory, "."},
-    SeeAlso => {"Code"},
-    }
+doc ///
+    Key
+    	vectorSpace
+	(vectorSpace,LinearCode)
+    Headline
+    	vector space of a code
+    Usage
+    	vectorSpace C
+    Inputs
+    	C:LinearCode
+    Outputs
+    	:Module
+	    $V$
+    Description
+    	Text
+	    Given a linear code {\tt C}, this function returns $V$, the vector
+	    space spanned by the rows of a generator matrix of {\tt C}.
+    	Example
+	    H = hammingCode(2,3);
+	    vectorSpace H
+    	Text
+	    The next is an example for the class of @TO EvaluationCode@.
+       	Example
+	    RM = reedMullercode(2,4,1);
+	    vectorSpace(RM.LinearCode)
+///
 
-document {
-    Key => {messages, (messages,LinearCode)},
-    Headline => "Plain messages that can be encoded by a linear code",
-    Usage => "messages C",
-    Inputs => {
-	"C" => LinearCode => {"A linear code over a Galois Field."},
-	},
-    Outputs => {
-	List => {"A list of all possible plain messages that can be encoded using C."},
-	},
-    "Given a code C of length n and dimension k over a Galois Field F, this function returns a list with all elements of F^k.",
-    EXAMPLE {
-	"R = linearCode(GF(4,Variable => b),{{1,1,1}});",
-	"messages R",
-	"messages HammingCode(2,3)"
-	},
-    "The next example shows how to use the size method for Evaluation Codes.",
-    EXAMPLE {
-	"RM = RMCode(2,2,1);",
-        "messages(RM.LinearCode)"
-	},
-    PARA{"This method is provided by the package ", TO CodingTheory, "."},
-    SeeAlso => {"codewords"}
-    }
+doc ///
+    Key
+    	messages
+	(messages,LinearCode)
+    Headline
+    	set of messages to be encoded by a code
+    Usage
+    	messages C
+    Inputs
+    	C:LinearCode
+    Outputs
+    	:List
+    Description
+    	Text
+	    Given a code {\tt C} of dimension $k$ over a finite field $F$,
+	    this function returns the list that contains all the elements of $F^k$.
+	    Every element of the list can be used to encode a message using the linear code {\tt C}.
+    	Example
+	    F=GF(4,Variable=>a);
+	    R=linearCode(F,{{1,1,1}});
+	    messages R
+    	Example
+	    messages hammingCode(2,3)
+	Example
+	    RM=reedMullercode(2,2,1);
+	    messages(RM.LinearCode)
+    	Text
+            This method is provided by the package @TO CodingTheory@.
+    SeeAlso
+    	codewords
+///
 
-document {
-     Key => {cyclicCode, (cyclicCode, GaloisField , RingElement, ZZ), (cyclicCode,GaloisField,ZZ,ZZ)},
-     Headline => "Given a polynomial generates a cyclic code of lenght n over the GaloisField",
-     Usage => "cyclicCode(F ,g, n)",
-     Inputs => {
-         "F" => GaloisField => {"The Ring of coefficients of the polynomial."},
- 	"g" => RingElement => {"A polynomial with coefficients in F."},
- 	"n" => ZZ => {"The lenght of the code."}
- 	},
+doc ///
+	Key
+		cyclicCode
+		(cyclicCode, GaloisField, RingElement, ZZ)
+                
+	Headline
+	       cyclic code
+	Usage
+		cyclicCode(F, g, n)
+	Inputs
+		F:GaloisField
+		g:RingElement
+		n:ZZ
+	Outputs
+		:LinearCode
+			$C$
+	Description
+		Text
+			Given a finite field {\tt F}, an integer {\tt n},
+			and a polynomial {\tt g} in {\tt F}$[x]$ that is a
+			divisor of $x^n-1$, this function returns the cyclic code $C$
+			with generating polynomial {\tt g} and lenght {\tt n}.	
 
-      Outputs => {
- 	  "C" => LinearCode => {"if g is a divisor of x^n-1 Cyclic returns a Code with generating polynomial g and lenght n.\n	
-                                   Else  Returns a code with a circulant matrix as generating matrix."}
- 	  },
-       "g is a polynomial over F and n is an integer.\n",
-       "Returns the Cyclic code with generating polynomial g over F and lenght n.",
-       EXAMPLE {
- 	  "F=GF(5);",
- 	   "R=F[x];",
- 	   "g=x-1;",
- 	   "C=cyclicCode(F,g,8);"
- 	   }
-         }
+		Text
+			If the polynomial {\tt g} is not a divisor of $x^n-1$,
+			the function returns a code with a circulant matrix as
+			generator matrix.
+		Example
+			F=GF(5);
+			R=F[x];
+			g=x-1;
+			C=cyclicCode(F,g,8)
+///
 
 doc ///
 	Key
 		quasiCyclicCode
-		(quasiCyclicCode,GaloisField,List)
 		(quasiCyclicCode,List)
+		(quasiCyclicCode,GaloisField,List)
 	Headline
 		constructs a quasi-cyclic code
 	Usage
+		quasiCyclicCode(L)
 		quasiCyclicCode(F,L)
 	Inputs
+		L:List
 		F:GaloisField
+	Outputs
+		:LinearCode
+			$C$
+	Description
+		Text
+			We present below the different ways in how a quasi-cyclic
+			code $C$ can be defined.
+    Synopsis
+    	Heading
+		a list is given
+	BaseFunction
+		quasiCyclicCode
+	Usage
+		quasiCyclicCode(L)
+	Inputs
 		L:List
 	Outputs
 		:LinearCode
-		    C
+			$C$
 	Description
 		Text
-			{\\tt L} is a list of vectors, whose entries belong to {\\tt F}.
-			Every vector \(v_i\) in $L$ generate a cyclic matrix $A_i$.
-			Returns the quasi-cyclic code $C$ whose generator matrix is the concatenation of the matrices $A_i.$
-		Example
-			F = GF(5);
-			L = apply(toList(1..2),j-> apply(toList(1..4),i-> random(F)));
-    	    	    	L
-			C2=quasiCyclicCode(F,L)
-    Synopsis
-    	Heading
-	    a different way to use this function
-	BaseFunction
-	    quasiCyclicCode
-	Usage
-	    quasiCyclicCode(L)
-	Inputs
-	    L:List
-	Outputs
-	    :LinearCode
-		    $C$
-	Description
-		Text
-			$L$ is a list of vectors, whose entries belong to $F.$
-			Every vector $v_i$ in $L$ generate a cyclic matrix $A_i$.
-			Returns the quasi-cyclic code $C$ whose generator matrix is the concatenation of the matrices $A_i.$
+			{\tt L} is a list of vectors.
+			Every vector \(v_i\) in {\tt L} generates a cyclic matrix $A_i$.
+			Returns the quasi-cyclic code $C$ whose generator matrix is the
+			concatenation of the matrices $A_i$.
 		Example
 			F = GF(5);
 			L = apply(toList(1..2),j-> apply(toList(1..4),i-> random(F)));
     	    	    	L
 			C2=quasiCyclicCode(L)
+    Synopsis
+    	Heading
+		a finite field and a list are given
+	BaseFunction
+		quasiCyclicCode
+	Usage
+		quasiCyclicCode(F,L)
+	Inputs
+		L:List
+		F:GaloisField
+	Outputs
+		:LinearCode
+			$C$
+	Description	    
+		Text
+			{\tt L} is a list of vectors, whose entries belong to the
+			field {\tt F}.
+			Every vector \(v_i\) in {\tt L} generates a cyclic matrix $A_i$.
+			Returns the quasi-cyclic code $C$ whose generator matrix is the
+			concatenation of the matrices $A_i$.
+		Example
+			F = GF(5);
+			L = apply(toList(1..2),j-> apply(toList(1..4),i-> random(F)));
+    	    	    	L
+			C2=quasiCyclicCode(F,L)
 ///
-
 -----------------------------------------------
 -----------------------------------------------
 -- Use this section for Evaluation Code documentation:
@@ -3654,12 +3974,18 @@ doc ///
 	Key
     	 EvaluationCode
 	Headline
-	 types of evaluation codes
+	 class of evaluation codes
 	Description
 	 Text
-	  EvaluationCode is the class of linear codes obtained by evaluating m-variate polynomials over a finite field F at a set of points in F^m. There are different constructions of evaluation codes depending on how the polynomials and points are chosen. Examples include Reed-Muller codes, monomial codes, cartesian codes, toric codes, and others.
+	  EvaluationCode is the class of linear codes obtained by evaluating polynomials in
+	  $F[X_1,\ldots,X_m]$, where $F$ is a finite field, at a set of points in $F^m$. There are different
+	  constructions of evaluation codes depending on how the polynomials and points are chosen.
+	  Important examples include Reed-Solomon codes, Reed-Muller codes, monomial codes, Cartesian codes,
+	  and toric codes. To construct a linear code, see @TO evaluationCode@.
 	 Text
-	  The basic structure is a hash table. One of the keys is the linear resulting linear code linearCode of type LinearCode. Other keys include the set of points, its vanishing ideal, the set of polynomials, and more.
+	  The basic structure is a hash table. One of the keys is the resulting linear code of type
+	  @TO LinearCode@. Other keys include the set of points, its vanishing ideal,
+	  the set of polynomials, and more.
 	 Example
 	  F=GF(4);
 	  R=F[x,y];
@@ -3678,21 +4004,30 @@ doc ///
 	    LocallyRecoverableCode
 	    (LocallyRecoverableCode,List,List,RingElement)
 	Headline
-	    Constructs a locally recoverable code (LRC)
+	    constructs a locally recoverable code (LRC)
 	Usage
 	    LocallyRecoverableCode(L,A,g)
 	Inputs
 	    L:List
-	    	$L=\{q,n,k,r\}$, target code over $F=GF(q)$ (Galois field with $q$ elements), of length $n$, dimension $k$, and locality $r.$
 	    A:List
-	    	a list $A$ of lists. Every sublist contains different elements of $F.$ The intersection between two sublists is empty.
 	    g:RingElement
-	    	a polynomial $g$ that is constant on the elements of each sublist in the list $A.$
 	Outputs
-	    C:LinearCode
+	    :LinearCode
+	    	$C$
 	Description
 	    Text
-	    	Generates an $[n,k]$ LRC $C$ with locality $r$ over $GF(q)$ from a list $A$ and a "good" polynomial $g$. This code has the property that for every $1\leq i \leq n,$ there exist $i_1,\ldots,i_r$ such that for every codeword $c$ in $C,$ the entry $c_i$ can be recovered from the entries $c_{i_1},...,c_{i_r}.$ This construction was introduced by Tamo and Barg in the paper {\it A family of optimal locally recoverable codes:} \url{https://arxiv.org/pdf/1311.3284.pdf}.
+	    	{\tt L} is the list $\{q,n,k,r\},$ where $q$ is a prime power, and $n$, $k$ and $r$ are
+		positive integers. {\tt A} is a list that contains lists of elements of the field
+		{\tt GF(q)}. Every sublist contains different elements of {\tt GF(q)}.
+		The intersection between every two sublists is empty. The polynomial {\tt g} is "good",
+		which means
+		that is constant on every sublist of {\tt A}. This function
+	    	generates an LRC code $C$ of length $n$, dimension $k$, and locality $r$, over
+		{\tt GF(q)}. This code $C$ has the property that for every $1\leq i \leq n$,
+		there exist $i_1,\ldots,i_r$ such that for every codeword $c$ in $C$, the entry $c_i$ 
+		can be recovered from the entries $c_{i_1},...,c_{i_r}$. This construction was introduced
+		by Tamo and Barg in the paper {\it A family of optimal locally recoverable codes}:
+		\url{https://arxiv.org/pdf/1311.3284.pdf}.
 	    Example
 	    	A={{1,3,9},{2,6,5},{4,12,10}}
 		R=(ZZ/13)[x]
@@ -3700,206 +4035,477 @@ doc ///
 		LocallyRecoverableCode({13,9,4,2},A,g)
 ///
 
+doc ///
+	Key
+		evaluationCode
+		(evaluationCode, Ring, List, List)
+		(evaluationCode, Ring, List, Matrix)
+	Headline
+		an evaluation code construction
+	Usage
+		evaluationCode(F,P,S)
+		evaluationCode(F,P,M)
+	Inputs
+		F:Ring
+		P:List
+		S:List
+		M:Matrix
+	Outputs
+		:EvaluationCode
+			$C$
+	Description
+		Text
+			We present below the different ways in how an evaluation
+			code $C$ can be defined.
+	Caveat
+		While this function may work even when a ring is given,
+		instead of a finite field, it is possible that the results
+		are not the expected ones.
+    Synopsis
+    	Heading
+		a ring and a two lists are given
+	BaseFunction
+		evaluationCode
+	Usage
+		evaluationCode(F,P,S)
+	Inputs
+		F:Ring
+		P:List
+		S:List
+	Outputs
+		:EvaluationCode
+			$C$
+	Description
+		Text
+			Given a finite field {\tt F}, an ordered list {\tt P}
+			of points in {\tt F}$^m$, and an ordered list {\tt S}
+			of polynomials over {\tt F} in $m$ variables,
+			this method produces an {\tt EvaluationCode} $C$ generated
+			by codewords obtained by evaluating the given polynomials in
+			{\tt S} at the given points in {\tt P}.
+		Example
+			F=GF(4);
+                        R=F[x,y,z];
+	                P={{0,0,0},{1,0,0},{0,1,0},{0,0,1},{1,1,1},{a,a,a}};
+                        S={x+y+z,a+y*z^2,z^2,x+y+z+z^2};
+	                C=evaluationCode(F,P,S)
+    Synopsis
+    	Heading
+		a ring, a list and a matrix are given
+	BaseFunction
+		evaluationCode
+	Usage
+		evaluationCode(F,P,M)
+	Inputs
+		F:Ring
+		P:List
+		M:Matrix
+	Outputs
+		:EvaluationCode
+			$C$
+	Description
+		Text
+			Given a finite field {\tt F}, an ordered list {\tt P}
+			of points in {\tt F}$^m$, and a matrix {\tt M} with
+			$m$ columns, this method produces a linear code $C$
+			generated by the codewords obtained by evaluating the
+			monomials defined by the rows of {\tt M} at the given
+			points in {\tt P}.
+		Example
+			F=GF(4);
+                        R=F[x,y,z];
+	                P={{0,0,0},{1,0,0},{0,1,0},{0,0,1},{1,1,1},{a,a,a}};
+                        M=matrix{{0,0,1},{1,1,1}};
+	                C=evaluationCode(F,P,M)
+///
+
+doc ///
+        Key
+		toricCode
+		(toricCode,Ring,Matrix)
+        Headline
+		a toric code construction
+        Usage
+                toricCode(F,M)
+        Inputs
+                F:Ring
+                M:Matrix
+        Outputs
+                :EvaluationCode
+                            $C$
+        Description
+                Text  
+       	                  Given a finite field {\tt F} and an integer matrix {\tt M}, this 
+                          method produces a toric code whose lattice polytope $P$ is the 
+                          convex hull of the row vectors of {\tt M}. By definition, the 
+                          toric code is generated by codewords obtained by evaluating the 
+                          monomials corresponding, to the lattice points of $P$ at the 
+                          points of the algebraic torus ({\tt F}*)$^m$, where $m$ is the 
+                          number of columns of {\tt M}. 
+     
+		Example
+			   M=matrix{{1,4},{2,5},{10,6}};
+	                   T=toricCode(GF 4,M);
+	                   T.VanishingIdeal
+	                   T.ExponentsMatrix
+	                   T.LinearCode
+	                   length T.LinearCode
+	                   dim T.LinearCode
+///
+
+doc ///
+	Key
+	        cartesianCode
+		(cartesianCode, Ring, List, List)
+		(cartesianCode, Ring, List, ZZ)
+                (cartesianCode, Ring, List, Matrix)
+	Headline
+		Cartesian code
+	Usage
+		cartesianCode(F, L, d)
+		cartesianCode(F, L, S)
+		cartesianCode(F, L, M)
+	Inputs
+		F:Ring
+		L:List
+		S:List
+		d:ZZ
+		M:Matrix
+	Outputs
+		:EvaluationCode
+			$C$
+	Description
+		Text
+			We present below the different ways in how a Cartesian
+			code $C$ can be defined.
+	Caveat
+		While this function may work even when a ring is given,
+		instead of a finite field, it is possible that the results
+		are not the expected ones.
+    Synopsis
+	Heading
+		a ring, a list and an integer are given
+	BaseFunction
+		cartesianCode
+	Usage
+		cartesianCode(F, L, d)
+	Inputs
+		F:Ring
+		L:List
+		d:ZZ
+	Outputs
+		:EvaluationCode
+			$C$
+	Description	    
+		Text
+			{\tt F} is a field, {\tt L}  is a list of subsets of
+			{\tt F} and {\tt d} is an integer. Returns the Cartesian code $C$
+		 	obtained when polynomials of degree at most {\tt d} are evaluated
+			over the points of the Cartesian product made by the subsets of
+			{\tt L}.
+		Example
+			C=cartesianCode(ZZ/11,{{1,2,3},{2,6,8}},3)
+    Synopsis
+    	Heading
+		a ring and two lists are given
+	BaseFunction
+		cartesianCode
+	Usage
+		cartesianCode(F, L, S)
+	Inputs
+		F:Ring
+		L:List
+		S:List
+	Outputs
+		:EvaluationCode
+			$C$
+	Description	    
+		Text
+			{\tt F} is a field, {\tt L}  is a list of subsets of {\tt F} and
+			{\tt S} is a set of polynomials. Returns the Cartesian code $C$
+			obtained when polynomials in the list {\tt S} are evaluated over
+			the points of the Cartesian product made by the subsets of {\tt L}.
+		Example
+			F=GF(4);
+			R=F[x,y];
+			C=cartesianCode(F,{{0,1,a},{0,1,a}},{1+x+y,x*y})
+			C.LinearCode
+    Synopsis
+    	Heading
+		a ring, a list and a Matrix are given
+	BaseFunction
+		cartesianCode
+	Usage
+		cartesianCode(F, L, M)
+	Inputs
+		F:Ring
+		L:List
+                M:Matrix
+	Outputs
+		:EvaluationCode
+			$C$
+	Description	    
+		Text
+			{\tt F} is a field, {\tt L} is a list of subsets of {\tt F} and
+			{\tt M} is the matrox whose rows are the exponents of the monomials
+			to evaluate. Returns the Cartesian code $C$ obtained when the
+			monomials defined by the matrix {\tt M} are evaluated over
+			the points of the Cartesian product made by the subsets of {\tt L}.
+		Example
+			F=GF(4);
+			R=F[x,y];
+			C=cartesianCode(F,{{0,1,a},{0,1,a}},matrix{{1,2},{2,3}})
+///
+
+doc ///
+	Key
+		reedMullercode
+		(reedMullercode,ZZ,ZZ,ZZ)
+	Headline
+	        constructs the Reed-Muller code  
+	Usage
+		reedMullercode(q,m,d)
+	Inputs
+		q:ZZ
+                m:ZZ
+                d:ZZ
+	Outputs
+		:EvaluationCode
+	Description
+		Text
+			Given the integers {\tt q}, {\tt m} and {\tt d}, returns the
+			Reed-Muller code obtained when polynomials in {\tt m} variables
+			of total degree at most {\tt d} are evaluated on the points
+			of {\tt GF(q)}$^\mathtt{m}$.
+		Example
+			 C=reedMullercode(2,3,4);
+	                 C.Sets;
+	                 C.VanishingIdeal;
+	                 C.PolynomialSet;
+	                 C.LinearCode;
+	                 length C.LinearCode
+///
+
+doc ///
+	Key
+		reedSolomoncode
+		(reedSolomoncode,Ring,List,ZZ)
+	Headline
+	         constructs the Reed-Solomon code  
+	Usage
+		reedSolomoncode(F,L,k)
+	Inputs
+		F:Ring
+                L:List
+                k:ZZ
+	Outputs
+		:EvaluationCode
+	Description
+		Text
+			Given a field {\tt F}, a list {\tt L} of different elements
+			of {\tt F}, and an integer {\tt k}, returns the Reed-Solomon
+			code obtained when polynomials of degree less than {\tt k}
+			are evaluated on the elements of {\tt L}.
+		Example
+			 C=reedSolomoncode(ZZ/31,{1,2,3},3);
+	                 peek C
+///
+
+doc ///
+	Key
+		generatorToParityCheck
+		(generatorToParityCheck, Matrix)
+	Headline
+		parity check matrix of a linear code
+	Usage
+		generatorToParityCheck(G)
+	Inputs
+		G:Matrix
+	Outputs
+		:Matrix
+			$H$
+	Description
+		Text
+			Constructs a parity check matrix $H$ of the linear code
+			generated by {\tt G}.
+		Example
+			F = GF 2;
+			L = {{0,1,1,0},{1,0,1,0},{0,0,0,1}};
+			G = matrix apply(L, codeword->apply(codeword, en -> sub(en,F)))
+			H = generatorToParityCheck G
+			K = GF(8,Variable => a);
+			G = matrix {{1,0,0,a,0,1,1,a},{0,0,0,1,1,1,1,0},{1,1,0,0,0,1,0,0},{1,0,1,0,0,1,1,0}}
+			H = generatorToParityCheck G
+///
+
+doc ///
+    Key
+    	orderCode
+	(orderCode,Ring,List,List,ZZ)
+	(orderCode,Ideal,List,List,ZZ)
+	(orderCode,Ideal,List,ZZ)
+    Headline
+    	computes an order code for a given weight
+    Usage
+    	orderCode(F,P,v,d)
+	orderCode(I,P,v,d)
+	orderCode(I,v,d)
+    Inputs
+    	F:Ring
+	P:List
+	v:List
+	I:Ideal
+	d:ZZ
+    Outputs
+    	:EvaluationCode
+	    $C$
+    Description
+    	Text
+	    Consider a finite field {\tt F} and
+	    {\tt F}$[t_1,\ldots,t_m]$ dotated with
+	    a weight order defined by the list {\tt v} of size $m$.
+	    For {\tt P}$=\{P_1,\ldots,P_n\}\subset${\tt F}$^m$, an order
+	    code of degree $d$ is the spanned of $(f(P_1),\ldots,f(P_n))$,
+	    where $f$ is a monomial of weight at most $d$.
+	    We describe different ways to obtain an order code.
+    Caveat
+	While this function may work even when a ring is given,
+	instead of a finite field, it is possible that the results
+	are not the expected ones.
+    Synopsis
+    	Heading
+	    a list of points and the vector weight are given
+	BaseFunction
+	    orderCode
+	Usage
+	    orderCode(F,P,v,d)
+	Inputs
+	    F:Ring
+	    P:List
+	    v:List
+	    d:ZZ
+	Outputs
+	    :LinearCode
+	    	$C$
+	Description
+	    Text
+	    	The order code $C$ of degree {\tt d} over the points of {\tt P} using the weight vector {\tt v}.  
+	    Example
+	    	F = GF(4);
+		P = {{0, 0}, {a, a}, {a+1, a}, {1, a}, {a, a+1}, {a+1, a+1}, {1, a+1}, {0, 1}};
+		C = orderCode(F,P,{2,3},7);
+		peek C
+    Synopsis
+    	Heading
+	    given the ideal of the finite algebra associated to the order function and a list of points
+	BaseFunction
+	    orderCode
+	Usage
+	    orderCode(I,P,v,d)
+	Inputs
+	   I: Ideal
+	   P: List
+	   v: List
+	   d: ZZ
+	Outputs
+	    :LinearCode
+	    	$C$
+	Description
+	    Text
+	    	If {\tt I} is the ideal associated to the semigroup generated by {\tt v},
+		this function allows us to improve by knowing a basis defined through {\tt I}.
+	    Example
+	    	F = GF(4);
+		R = F[x,y];
+		I = ideal(x^3+y^2+y)
+		P = {{0, 0}, {a, a}, {a+1, a}, {1, a}};
+		C = orderCode(I,P,{2,3},7);
+		peek C
+    Synopsis
+    	Heading
+	    given just an ideal and the weight vector
+    	BaseFunction
+	    orderCode
+	Usage
+	    orderCode(I,v,d)
+	Inputs
+	    I:Ideal
+	    v:List
+	    d:ZZ
+	Outputs
+	    :LinearCode
+	    	$C$
+	Description
+	    Text
+	    	The order code of degree {\tt d}, using the order function defined by {\tt v} and the set of points the zeroes of {\tt I}.
+	    Example
+	    	F = GF(4);
+		R = F[x,y];
+		I = ideal(x^3+y^2+y);
+		C = orderCode(I,{2,3},7);
+		peek C
+///
 
 
+doc ///
+	Key
+		getLRCencodingPolynomial
+		(getLRCencodingPolynomial, ZZ,ZZ, List, RingElement)
+    Headline
+    	encoding polynomial for an LRC code
+    Usage
+    	getLRCencodingPolynomial(k,r,List,informationList,g)
+    Inputs
+    	k:ZZ
+	r:ZZ
+	informationList: List
+	g:RingElement
+    Outputs
+    	:RingElement
+	    $f(x)$
+    Description
+    	Text
+	    Generates an encoding polynomial $f(x)$ corresponding to an information vector
+	    in $F^\texttt{k}$, where $F$ is a field, which can be used to generate an
+	    encoding in $F^\texttt{r}$.
+	    
+	Example
+	    R=ZZ/(13)[x];
+	    getLRCencodingPolynomial(4,2,{1,0,1,1},x^3)
+///
 
-document {
-    Key => {evaluationCode, (evaluationCode,Ring,List,List), (evaluationCode,Ring,List,Matrix)},
-    Headline => "An evaluation code construction",
-    Usage => "evaluationCode(F,P,S)\nevaluationCode(F,P,M)",
-    Inputs => {
-	"F" => Ring => {"A finite field."},
-	"P" => List => {"A list of points in F^m."},
-	"S" => List => {"A set of polynomials over F in m variables."}, 
-	"M" => Matrix => {"Matrix whose rows are the exponents of the monomials to evaluate."}
-	},
-    Outputs => {
-	"C" => EvaluationCode => {"Evaluation code."}
-	},
-    "Given a finite field F, an ordered list of points in an affine space F^m, and an ordered list of polynomials over F in m variables.\n",
-    "This method produces a linear code generated by codewords obtained by evaluating the given polynomials at the given points. ",
-    "In the case when the polynomials are monomials, one may give the matrix of exponent vectors instead of the list of polynomials.\n",
-    EXAMPLE {
-	"F=GF(4);",
-	"R=F[x,y,z];",
-	"P={{0,0,0},{1,0,0},{0,1,0},{0,0,1},{1,1,1},{a,a,a}};",
-	"S={x+y+z,a+y*z^2,z^2,x+y+z+z^2};",
-	"C=evaluationCode(F,P,S);",
-	"C.VanishingIdeal",
-	"C.PolynomialSet",
-	"C.LinearCode",
-	"length C.LinearCode",
-	"dim C.LinearCode"
-	}
-    }
-
-document {
-    Key => {toricCode, (toricCode,Ring,Matrix)},
-    Headline => "A toric code construction",
-    Usage => "toricCode(F,M)",
-    Inputs => {
-	"F" => Ring => {"A finite field."},
-	"M" => Matrix => {"An integer matrix."}
-	},
-    Outputs => {
-	"C" => EvaluationCode => {"Toric code."}
-	},
-    "Given a finite field F and an integer matrix M, ",
-    "this method produces a toric code whose lattice polytope P is the convex hull of the row vectors of M. ",
-    "By definition, the toric code is generated by codewords obtained by evaluating the monomials corresponding ",
-    "to the lattice points of P at the points of the algebraic torus (F*)^m, where m is the number of columns of M.\n",
-    EXAMPLE {
-	"M=matrix{{1,4},{2,5},{10,6}};",
-	"T=toricCode(GF 4,M);",
-	"T.VanishingIdeal",
-	"T.ExponentsMatrix",
-	"T.LinearCode",
-	"length T.LinearCode",
-	"dim T.LinearCode"
-	}
-    }
-
-document {
-    Key => {cartesianCode, (cartesianCode,Ring,List,List), (cartesianCode,Ring,List,ZZ), (cartesianCode,Ring,List,Matrix)},
-    Headline => "Constructs a Cartesian code",
-    Usage => "cartesianCode(F,L,S)\ncartesianCode(F,L,d)\ncartesianCode(F,L,M)",
-    Inputs => {
-	"F" => Ring => {"Field."},
-	"L" => List => {"Sets of F to make a Cartesian product."},
-	"S" => List => {"Sets of polynomials to evaluate."},
-	"d" => ZZ => {"Polynomials up to dedree d will be evaluated."}, 
-	"M" => Matrix => {"Matrix whose rows are the exponents of the monomials to evaluate."}
-	},
-    Outputs => {
-	"C" => EvaluationCode => {"Cartesian code."}
-	},
-    "F is a field, L  is a list of sets of F and d is an integer.\n",
-    "Returns the Cartesian code obtained when polynomials up to degree d are evaluated over the points on the Cartesian product made by the sets of L.",
-    EXAMPLE {
-	"C=cartesianCode(ZZ/11,{{1,2,3},{2,6,8}},3);",
-	"C.Sets",
-	"C.VanishingIdeal",
-	"C.PolynomialSet",
-	"C.LinearCode",
-	"length C.LinearCode"	
-	}
-    }
-
-document {
-    Key => {RMCode, (RMCode,ZZ,ZZ,ZZ)},
-    Headline => "Constructs the Reed-Muller code",
-    Usage => "RMCode(q,m,d)",
-    Inputs => {
-	"q" => ZZ => {"Size of the field."},
-	"m" => ZZ => {"Number of varibles."},
-	"d" => ZZ => {"Polynomials up to dedree d will be evaluated."}	
-	},
-    Outputs => {
-	"C" => EvaluationCode => {"Reed-Muller code."}
-	},
-    "q, m and d are integers.\n",
-    "Returns the Reed-Muller code obtained when polynomials in m variables up to total degree d are evaluated over the points on GF(q)^m.",
-    EXAMPLE {
-	"C=RMCode(2,3,4);",
-	"C.Sets",
-	"C.VanishingIdeal",
-	"C.PolynomialSet",
-	"C.LinearCode",
-	"length C.LinearCode"
-	}
-    }
-
-document {
-    Key => {RSCode, (RSCode,Ring,List,ZZ)},
-    Headline => "Constructs the Reed-Solomon code",
-    Usage => "RSCode(F,L,k)",
-    Inputs => {
-	"F" => Ring => {"Finite field."},
-	"L" => List => {"Elements of the field to evaluate."},
-	"k" => ZZ => {"Polynomials of dedree less than k will be evaluated."}	
-	},
-    Outputs => {
-	"C" => EvaluationCode => {"Reed-Solomon code."}
-	},
-    "F is a finite fiel, $L={a_1,...,a_n}$ contains the elements to evaluate, polynomials of degree less than k are used to evaluate.\n",
-    "Returns the Reed-Solomon code obtained when polynomials of degree less than k are evaluated on the elements of L.",
-    EXAMPLE {
-	"C=RSCode(ZZ/31,{1,2,3},3);",
-	"peek C"
-	}
-    }
-
-document {
-    Key => {orderCode, (orderCode,Ring,List,List,ZZ), (orderCode,Ideal,List,List,ZZ), (orderCode,Ideal,List,ZZ)},
-    Headline => "Order codes",
-    Usage => "orderCode(F,P,G,d)\norderCode(I,P,G,d)\norderCode(I,G,d)\n",
-    Inputs => {
-	"F" => Ring => {"Finite field."},
-	"P" => List => {"A list of points to evaluate."},
-	"G" => List => {"A list of natural numbers."},
-	"I" => Ideal => {"Ideal whose rational points will be evaluated."},
-	"l" => ZZ  => {"Polynomials up to weigth l will be evaluated."}	
-	},
-    Outputs => {
-	"C" => EvaluationCode => {"Order code"}
-	},
-    "F is a field, P is a list of points to evaluate, G is a list of natural numbers.\n",
-    "Returns the Evaluation code obtained when polynomials in #P variables up to weight l are evaluated over the points on P.",
-    EXAMPLE {
-	"F=GF(4);",
-	"R=F[x,y];",
-	"I=ideal(x^3+y^2+y);",
-	"l=7;",
-	"C=orderCode(I,{2,3},l);",
-	"peek C"
-	}
-    }
-
-
- document {
-     Key => {getLRCencodingPolynomial, (getLRCencodingPolynomial, ZZ,ZZ, List, RingElement)},
-     Headline => "Constructs an encoding polynomial for an LRC code",
-     Usage => "getLRCencodingPolynomial(k,r, List,informationList,g)",
-     Inputs => {
- 	"k" => ZZ => {"represents the target dimension."},
- 	"r" => ZZ => {"represents the target locality."},
- 	"informationList" => List => {"a vector in the space F^k."},
- 	"g" => RingElement => {"a polynomial in BaseField[x]."}
- 	},
-     Outputs => {
- 	"LRCencodingPolynomial" => RingElement => {"An encoding polynomial corresponding to an information vector in (BaseField^k)."}
- 	},
-     "Generates an encoding polynomial corresponding to an information vector in (BaseField)^k, which can be used to generate an encoding in (BaseField)^n.",
-     EXAMPLE {
-         "R=ZZ/(13)[x];",
-	 "getLRCencodingPolynomial( 4,2, {1,0,1,1}, x^3 )"
- 	}
-     }
-
-
-
-document {
-    Key => {evCodeGraph, (evCodeGraph,Ring,Matrix,List)},
-    Headline => "Constructs a Reed–Muller-type code over a graph",
-    Usage => "evCodeGraph(F,M,S)",
-    Inputs => {
-        "F" => Ring => {"Field."},
-	"M" => Matrix => {"The incidence matrix of the connected graph G."},
-	"S" => List => {"A list of polynomials over F."}
-    },
-    Outputs => {
-        "C" => EvaluationCode => {"Evaluation code over a graph."}
-    },
-    "Given a field F of prime characteristic, a incidence matrix M of a connected graph G, and an ordered list of polynomials over F. ",
-    "This method produces an evaluation code generated by the incidence matrix of the graph G by evaluating the given polynomials at the columns of the incidence matrix.",
-    EXAMPLE {
-   "G = graph({1,2,3,4}, {{1,2},{2,3},{3,4},{4,3}});",
-   "B=incidenceMatrix G;",
-   "S=ZZ/2[t_(0)..t_(#vertexSet G-1)];",
-   "Y=evCodeGraph(coefficientRing S,B,flatten entries basis(1,S))"
-	}
-    }
-
+doc ///
+	Key
+		evCodeGraph
+		(evCodeGraph,Ring,Matrix,List)
+	Headline
+		Reed–Muller-type code over a graph
+	Usage
+		evCodeGraph(F,M,S)
+	Inputs
+		F:Ring
+		M:Matrix
+		S:List
+	Outputs
+		:EvaluationCode
+			$C$
+	Description
+		Text
+			Given a finite field {\tt F}, an incidence matrix {\tt M}
+			of a connected graph $G$, and an ordered list {\tt S} of
+			polynomials over {\tt F}, this method produces an
+			{\tt EvaluationCode} $C$ generated by evaluating the given
+			polynomials in {\tt S} at the columns of the matrix {\tt M}.
+		Example
+			G = graph({1,2,3,4}, {{1,2},{2,3},{3,4},{4,3}});
+			B=incidenceMatrix G;
+			S=ZZ/2[t_(0)..t_(#vertexSet G-1)];
+			Y=evCodeGraph(coefficientRing S,B,flatten entries basis(1,S))
+	Caveat
+		While this function may work even when a ring is given,
+		instead of a finite field, it is possible that the results
+		are not the expected ones.
+///
 
 document {
     Key => ExponentsMatrix,
