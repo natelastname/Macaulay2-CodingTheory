@@ -105,9 +105,9 @@ export {
     "shorten",
     "vNumber",
     "footPrint",
-    "hYpFunction",
-    "gMdFunction",
-    "vasFunction",
+    "hyp",
+    "genMinDisIdeal",
+    "vasconcelosDegree",
     "tannerGraph",
     "randNoRepeats",
     "randLDPC",
@@ -1405,8 +1405,8 @@ footPrint (ZZ,ZZ,Ideal) := (d,r,I) ->(
  
 --------------------------------------------------------
 --=====================hyp function======================
-hYpFunction = method(TypicalValue => ZZ);
-hYpFunction (ZZ,ZZ,Ideal) := (d,r,I) ->(
+hyp = method(TypicalValue => ZZ);
+hyp (ZZ,ZZ,Ideal) := (d,r,I) ->(
     var1 := apply(toList (set(0..char ring I-1))^**(hilbertFunction(d,coker gens gb I))
      	-(set{0})^**(hilbertFunction(d,coker gens gb I)),toList);
     var2 := apply(var1,x -> basis(d,coker gens gb I)*vector deepSplice x);
@@ -1422,16 +1422,16 @@ hYpFunction (ZZ,ZZ,Ideal) := (d,r,I) ->(
 
 ------------------------GMD Function--------------------------------
 
-gMdFunction = method(TypicalValue => ZZ);
-gMdFunction (ZZ,ZZ,Ideal) := (d,r,I) ->(
-    degree(coker gens gb I)-hYpFunction(d,r,I)
+genMinDisIdeal = method(TypicalValue => ZZ);
+genMinDisIdeal (ZZ,ZZ,Ideal) := (d,r,I) ->(
+    degree(coker gens gb I)-hyp(d,r,I)
     )
 
 --------------------------------------------------------------
 --===================== Vasconcelos Function ================
 
-vasFunction = method(TypicalValue => ZZ);
-vasFunction (ZZ,ZZ,Ideal) := (d,r,I) ->(
+vasconcelosDegree = method(TypicalValue => ZZ);
+vasconcelosDegree (ZZ,ZZ,Ideal) := (d,r,I) ->(
     var1:=apply(toList (set(0..char ring I-1))^**(hilbertFunction(d,coker gens gb I))
 	-(set{0})^**(hilbertFunction(d,coker gens gb I)),toList);
     var2:=apply(var1,x -> basis(d,coker gens gb I)*vector deepSplice x); 
@@ -1964,32 +1964,32 @@ assert(footPrint(3,4,I)==4)
 ///
 
 TEST ///
--- hYpFunction of the ideal I=ideal(t1*t6-t3*t4,t2*t6-t3*t5) with parameters d=1, r=1.
+-- hyp of the ideal I=ideal(t1*t6-t3*t4,t2*t6-t3*t5) with parameters d=1, r=1.
 K=ZZ/3
 R=K[t1,t2,t3,t4,t5,t6]
 I=ideal(t1*t6-t3*t4,t2*t6-t3*t5)
-hYpFunction(1,1,I)
-assert(hYpFunction(1,1,I)==1)
+hyp(1,1,I)
+assert(hyp(1,1,I)==1)
 ///
 
 
 TEST ///
--- gMdFunction of the ideal I=ideal(t1*t6-t3*t4,t2*t6-t3*t5) with parameters d=1, r=1.
+-- genMinDisIdeal of the ideal I=ideal(t1*t6-t3*t4,t2*t6-t3*t5) with parameters d=1, r=1.
 K=ZZ/3
 R=K[t1,t2,t3,t4,t5,t6]
 I=ideal(t1*t6-t3*t4,t2*t6-t3*t5)
-gMdFunction(1,1,I)
-assert(gMdFunction(1,1,I)==3)
+genMinDisIdeal(1,1,I)
+assert(genMinDisIdeal(1,1,I)==3)
 ///
 
 
 TEST ///
- -- vasFunction of the ideal I=ideal(t1^2,t1*t2,t2^2) with parameters d=1, r=1.
+ -- vasconcelosDegree of the ideal I=ideal(t1^2,t1*t2,t2^2) with parameters d=1, r=1.
 K=ZZ/3
 R=K[t1,t2]
 I=ideal(t1^2,t1*t2,t2^2)
-vasFunction(1,1,I)
-assert(vasFunction(1,1,I)==1)
+vasconcelosDegree(1,1,I)
+assert(vasconcelosDegree(1,1,I)==1)
 ///
 
 
@@ -3079,39 +3079,89 @@ doc ///
 ///
 
 doc ///
-   Key
-       shorten
-       (shorten, LinearCode, List)
-       (shorten, LinearCode, ZZ)
-   Headline
-       Shortens a linear code 
-   Usage
-       shorten(LinearCode, List)
-       shorten(LindearCode, ZZ)
-   Inputs
-        C:LinearCode
-	    a codeword of length $n$.
-	L:List
-	    a list of coordinate positions.
-	i:ZZ
-	    an integer representing a single coordinate position.
-   Outputs
-       :LinearCode
-           a shortened linear code. 
-   Description
-       Text  
-       	   A new code from $C$ by selecting only those codewords of $C$ 
-	   having a zeros in each of the coordinate positions in the list $L$ (or the integer $i$) and deleting these 
-	   components. Thus, the resulting code will have length $n - r$, where $r$ is the number
-	   of elements in $L$ (or 1 when the integer $i$ is used). 
+        Key
+               shorten
+               (shorten, LinearCode, List)
+               (shorten, LinearCode, ZZ)
+        Headline
+                shortens a code 
+        Usage
+                shorten(LinearCode, List)
+                shorten(LindearCode, ZZ)
+        Inputs
+		C:LinearCode
+		L:List
+		i:ZZ
+        Outputs
+		:LinearCode
+        Description
+		Text  
+			Given a code {\tt C} of length $n$ and a list {\tt L}
+			(or an integer {\tt i}),
+			returns a new code obtained from {\tt C} by selecting only
+			those codewords of {\tt C} that have zeros in each of the
+			coordinate positions in the list {\tt L} (or the
+			position {\tt i}), and then deleting these positions.
+		Text  
+			The resulting code will have length $n - r$, where $r$ is the  
+                       number of elements in {\tt L} (or 1 when the integer {\tt i} is 
+                       used).
+     Synopsis
+    	Heading
+		a code and a list are given
+	BaseFunction
+		shorten
+	Usage
+		shorten(LinearCode, List)
+	Inputs
+		C:LinearCode
+		L:List
+	Outputs
+		:LinearCode
+	Description
+		Text  
+			Given a code {\tt C} of length $n$ and a list {\tt L},
+			returns a new code obtained from {\tt C} by selecting only
+			those codewords of {\tt C} that have zeros in each of the
+			coordinate positions in the list {\tt L},
+			and then deleting these positions.
+		Text
+			The resulting code will have length $n - r$, where $r$ is the  
+			number of elements in {\tt L}.
+		Example
+			F = GF(2);
+	                codeLen = 10;
+	                L = {{0, 1, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 1, 0, 1, 1, 0, 1, 0,0}, {1, 1, 0, 0, 0, 1, 0, 0, 1, 0}, {1, 0, 0, 1, 0, 0, 0, 1, 1,1}};
+                        C = linearCode(F,codeLen,L);
+	                shorten(C, {3,6,8,9});
+     Synopsis
+    	Heading
+		a linear code and an integer are given
+	BaseFunction
+		shorten
+	Usage
+		shorten(LinearCode, ZZ)
+	Inputs
+		C:LinearCode
+	        i:ZZ
+	Outputs
+		:LinearCode
+                        $C$
+	Description
+		Text  
+			Given a code {\tt C} of length $n$ and a list {\tt L},
+			returns a new code obtained from {\tt C} by selecting only
+			those codewords of {\tt C} that have zero in the position
+			{\tt i}), and then deleting this position.
+		Text
+			The resulting code will have length $n - 1$.
+		Example
+			F = GF(2);
+	                codeLen = 10;
+	                L = {{0, 1, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 1, 0, 1, 1, 0, 1, 0,0}, {1, 1, 0, 0, 0, 1, 0, 0, 1, 0}, {1, 0, 0, 1, 0, 0, 0, 1, 1,1}};
+                        C = linearCode(F,codeLen,L);
+                        shorten(C, 3)   
 
-       Example
-           F = GF(2)
-	   codeLen = 10
-	   L = {{0, 1, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 1, 0, 1, 1, 0, 1, 0, 0}, {1, 1, 0, 0, 0, 1, 0, 0, 1, 0}, {1, 0, 0, 1, 0, 0, 0, 1, 1, 1}}
-	   C = linearCode(F,codeLen,L)
-	   shorten(C, {3,6,8,9})
-	   shorten(C, 3)
 ///
 
 
@@ -3324,26 +3374,41 @@ doc ///
 	                enumerateVectors(F, {1,0,1,0,1})
 ///
 
-document {
-    Key => {randLDPC, (randLDPC, ZZ, ZZ, RR, ZZ)},
-    Headline => "Generates a low density family of parity check matrices with given parameters",
-    Usage => "randLDPC(n, k, m, b)",
-    Inputs => {
-	"n" => ZZ => {"The number of columns of H."},
-	"k" => ZZ => {"The number of rows of H is n-k."},
-	"m" => RR => {"The slope of the line which relates n and the number of ones in H."},
-	"b" => ZZ => {"The constant term of the line which relates n and the number of ones in H."}
-	},
-    Outputs => {
-       	"H" => Matrix => {"An (n-k) x n matrix over GF(2) with floor(n*m) + b ones."}
-	},
-    "The number of ones in H is determined by the formula floor(n*m) + b. ",
-    "Since this formula is linear in the number of columns of H, randLDPC produces a sparse sequence of matrices",
-    " for a fixed set of parameters k, m and b.",
-    EXAMPLE {
-	"randLDPC(10,5,3.0,0)"
-	}
- } 
+doc ///
+	Key
+		randLDPC
+		(randLDPC, ZZ, ZZ, RR, ZZ)
+	Headline
+		low density parity check matrix
+	Usage
+		randLDPC(n, k, m, b)
+	Inputs
+		n:ZZ
+		k:ZZ
+                m:RR
+                b:ZZ
+	Outputs
+		:Matrix
+			$H$
+	Description
+		Text
+			The parameter {\tt n} indiques the number of columns of $H$. The 
+			number of rows of $H$ is {\tt n}-{\tt k}. The real number
+			{\tt m} indiques the 
+			slope of the line which relates {\tt n} and the number of ones in 
+			$H$. Finally, {\tt b} indiques the constant term of the line 
+			which relates $n$ and the number of ones in $H$. The number of 
+			ones in $H$ is determined by the formula
+			floor({\tt  n}*{\tt m}) + {\tt b}.
+			Since this formula is linear in the number    
+			of columns of $H$, {\tt randLDPC} produces a sparse 
+			matrix, for a fixed set of parameters {\tt n}, {\tt k}, {\tt m} 
+			and {\tt b}.
+
+		Example
+			randLDPC(15,5,3.0,0)
+    
+///
 
 doc ///
 	Key
@@ -3373,24 +3438,37 @@ doc ///
 			randNoRepeats(25,5)
 ///
 
-document {
-   Key => {vNumber, (vNumber,Ideal)},
-   Headline => "Gives the v-number of a graded ideal",
-   Usage => "vNumber(I)",
-   Inputs => {
-	"I" => Ideal => {"Graded ideal."},
-	},
-   Outputs => {
-	"i" => ZZ => {"v-number of the ideal."}
-	},
-    	"Definition of the v-number can be found at Definition 4.1 at https://arxiv.org/pdf/1812.06529.pdf ",
-	EXAMPLE {
-	"K=ZZ/3;",
-        "R=K[t3,t2,t1,MonomialOrder=>Lex];",
-        "I=ideal(t1*t2^2-t1^2*t2,t1*t3^3-t1^3*t3,t2*t3^3-t2^3*t3);",
-        "vNumber(I)"
-	}
- }
+doc ///
+        Key
+               vNumber
+               (vNumber,Ideal)
+        Headline
+                the v-number of a graded ideal
+        Usage
+                vNumber(I)
+        Inputs
+                 I:Ideal
+        Outputs
+                :ZZ
+                           
+        Description
+                Text  
+			Returns the v-number of a graded ideal {\tt I}.
+			This invariant is used to express the regularity index of the 
+			generalized minimum distance function of the ideal {\tt I}
+			on the parameter $r=1$ @TO genMinDisIdeal@. Moreover,
+			the v-number has other combinatorial implications.
+			More information about the v-number
+			can be found in Definition 4.1 at        
+			\url{https://arxiv.org/pdf/1812.06529.pdf}.
+		Example
+			       K=ZZ/3;
+                               R=K[t3,t2,t1,MonomialOrder=>Lex];
+                               I=ideal(t1*t2^2-t1^2*t2,t1*t3^3-t1^3*t3,t2*t3^3-t2^3*t3);
+                               vnumber(I)
+ 
+
+///
  
 
  document {
@@ -3416,73 +3494,117 @@ document {
     
 
     
-document {
-  Key => {hYpFunction, (hYpFunction,ZZ,ZZ,Ideal)},
-   Headline => "Gives the value of the hyp function of the ideal I at (d,r)",
-   Usage => "hYpFunction(d,r,I)",
-   Inputs => {
-	"I" => Ideal => {"Graded ideal."},
-	"d" => ZZ => {"Polynomials up to degree d are used."},
-	"r" => ZZ => {"Number of linearly independent polynomials that are used."}
-	},
-   Outputs => {
-       "i" => ZZ => {"Value of the hyp function of I at (d,r)."}
-	},
-    	"Definition of the hyp function can be found at Definition 1.2 at https://arxiv.org/pdf/1812.06529.pdf ",
-	EXAMPLE {
-	"K=ZZ/3;", 
-        "R=K[t1,t2,t3,t4,t5,t6];",
-        "I=ideal(t1*t6-t3*t4,t2*t6-t3*t5);",
-        "hYpFunction(1,1,I)"
-	}
- }  
+doc ///
+        Key
+               hyp
+               (hyp,ZZ,ZZ,Ideal)
+        Headline
+                hyp function of an ideal
+        Usage
+                hyp(d,r,I)
+        Inputs
+                d:ZZ
+                r:ZZ
+                I:Ideal
+        Outputs
+                :ZZ
+                           
+        Description
+                Text
+			Returns the value of the
+			hyp function (HypF) of the ideal {\tt I}
+			on the parameters {\tt d} and {\tt r}. The HypF
+			computes the maximum degree of the ideals
+			generated by {\tt r}-tuples of 
+			polynomials of degree at most {\tt d} that are linearly
+			independent modulo the ideal {\tt I}.
+			Finding upper bounds for this functions is 
+			equivalent to finding lower bounds for the generalized minimum 
+			distance function @TO genMinDisIdeal@. 
+			More information about the Hyp
+			can be found in Definition 1.2 at        
+			\url{https://arxiv.org/pdf/1812.06529.pdf}.
+		Example
+			      K=ZZ/3;
+                              R=K[t1,t2,t3,t4,t5,t6];
+                              I=ideal(t1*t6-t3*t4,t2*t6-t3*t5);
+                              hyp(1,1,I)
  
 
- document {
-   Key => {gMdFunction, (gMdFunction,ZZ,ZZ,Ideal)},
-   Headline => "Gives the value of the generalized minimum distance function of the ideal I at (d,r)",
-   Usage => "gMdFunction(d,r,I)",
-   Inputs => {
-	"I" => Ideal => {"Graded ideal."},
-	"d" => ZZ => {"Polynomials up to degree d are used."},
-	"r" => ZZ => {"Number of linearly independent polynomials that are used."}
-	},
-   Outputs => {
-       "i" => ZZ => {"Value of the generalized minimum distance function of I at (d,r)."}
-	},
-    	"Definition of the generalized minimum distance function can be found at Definition 1.1 at https://arxiv.org/pdf/1812.06529.pdf ",
-	EXAMPLE {
-	"K=ZZ/3;", 
-        "R=K[t1,t2,t3,t4,t5,t6];",
-        "I=ideal(t1*t6-t3*t4,t2*t6-t3*t5);",
-        "gMdFunction(1,1,I)"
-	}
- }   
+///
  
+doc ///
+        Key
+               genMinDisIdeal
+               (genMinDisIdeal,ZZ,ZZ,Ideal)
+        Headline
+                generalized minimum distance function of an ideal
+        Usage
+                genMinDisIdeal(d,r,I)
+        Inputs
+                d:ZZ
+                r:ZZ
+                I:Ideal
+        Outputs
+                :ZZ
+                           
+        Description
+                Text
+			Returns the value of the
+			generalized minimum distance function (GMDF) of the ideal {\tt I}
+			on the parameters {\tt d} and {\tt r}. The GMDF
+			generalizes the Hamming weights
+			of Reed-Muller-type codes.
+			The integers {\tt d} and {\tt r} indique  
+			that the function is computing the degree of
+			the ideal generated by {\tt r}-tuples of 
+			polynomials of degree at most {\tt d} that are linearly
+			independent modulo
+			the ideal {\tt I}. More information about the GMDF
+			can be found in Definition 1.1 at        
+			\url{https://arxiv.org/pdf/1812.06529.pdf}.
+		Example
+			       K=ZZ/3; 
+                               R=K[t1,t2,t3,t4,t5,t6];
+                               I=ideal(t1*t6-t3*t4,t2*t6-t3*t5);
+                               genMinDisIdeal(1,1,I)
+///
 
- 
- 
- 
- document {
-   Key => {vasFunction , (vasFunction,ZZ,ZZ,Ideal)},
-   Headline => "Gives the value of the Vasconcelos function of the ideal I at (d,r)",
-   Usage => "vasFunction (d,r,I)",
-   Inputs => {
-	"I" => Ideal => {"Graded ideal."},
-	"d" => ZZ => {"Polynomials up to degree d are used."},
-	"r" => ZZ => {"Number of linearly independent polynomials that are used."}
-	},
-   Outputs => {
-       "i" => ZZ => {"Value of the Vasconcelos function of I at (d,r)."}
-	},
-    	"Definition of the Vasconcelos function can be found at Definition 3.4 at https://arxiv.org/pdf/1812.06529.pdf ",
-	EXAMPLE {
-	"K=QQ;", 
-        "R=K[t1,t2,t3];",
-        "I=ideal(t1^3,t2*t3);",
-        "vasFunction(1,1,I)"
-	}
- }
+doc ///
+        Key
+               vasconcelosDegree
+               (vasconcelosDegree,ZZ,ZZ,Ideal)
+        Headline
+                Vasconcelos function of an ideal
+        Usage
+                vasconcelosDegree(d,r,I)
+        Inputs
+                d:ZZ
+                r:ZZ
+                I:Ideal
+        Outputs
+                :ZZ
+                           
+        Description
+                Text
+			Returns the value of the
+			Vasconcelos function (VanF) of the ideal {\tt I}
+			on the parameters {\tt d} and {\tt r}.
+			In the case of a graded unmixed radical ideal {\tt I}, the
+			VanF is equal to the generalized minimum distance function
+			@TO genMinDisIdeal@. The VanF computes the minimum value
+			of the degree of {\tt I} minus the degree of the ideal
+			generated by {\tt r}-tuples of polynomials of degree at
+			most {\tt d} that are linearly independent
+			modulo the ideal {\tt I}. More information about the VasF
+			can be found in Definition 3.4 at        
+			\url{https://arxiv.org/pdf/1812.06529.pdf}.
+		Example
+			     K=QQ; 
+                             R=K[t1,t2,t3];
+                             I=ideal(t1^3,t2*t3);
+                             vasconcelosDegree(1,1,I)
+///
 
 doc ///
 	Key
