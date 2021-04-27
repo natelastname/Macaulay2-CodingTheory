@@ -2778,7 +2778,7 @@ document {
     }
 document {
     Key => {repetitionCode,(repetitionCode,GaloisField,ZZ)},
-    Headline => "Constructs the linear repetition code",
+    Headline => "Constructs the linear reperition code",
     Usage => "repetitionCode(F,n)",
     "These constructor is provided by the package ", TO CodingTheory, ".",
     Inputs => {
@@ -2835,34 +2835,27 @@ document {
        "reduceMatrix(m)",      
            }
       }
-
-doc ///
-	Key
-		bitflipDecode
-		(bitflipDecode, Matrix, Vector, ZZ)
-	Headline
-		an experimental implementation of a message passing decoder
-	Usage
-		bitflipDecoder(H,v,maxI)
-	Inputs
-		H:Matrix
-		v:Vector
-                maxI:ZZ
-	Outputs
-		:List
-
-	Description
-		Text
-			attempts to decode the vector {\tt v} relative to the parity check matrix {\tt H} using a message passing decoding algorithm. The matrix {\tt H} and the vector {tt v} must have entries in GF(2). Returns the empty list if {tt maxI} is exceeded.\n
-    At each iteration, this function flips all the bits of {\tt v} that fail the maximum number of parity check equations from {\tt H}. This is experimental because it has not been fully tested. The output is only guarenteed to be a codeword of the code defined by {\tt H}.
-    
-		Example
-			R=GF(2);
-	                H := matrix(R, {{1,1,0,0,0,0,0},{0,1,1,0,0,0,0},{0,1,1,1,1,0,0},{0,0,0,1,1,0,0},{0,0,0,0,1,1,0},{0,0,0,0,1,0,1}});
-	                v := vector transpose matrix(R, {{1,0,0,1,0,1,1}});
-	                bitflipDecode(H,v,100)
-///
-
+document {
+    Key => {bitflipDecode, (bitflipDecode,Matrix, Vector, ZZ)},
+    Headline => "An experimental implementation of a message passing decoder",
+    Usage => "bitflipDecode(H,v)",
+    Inputs => {
+	"H" => Matrix => {"The parity check matrix."},
+	"v" => Vector => {"The codeword to decode."},
+	"maxI" => ZZ => {"The maximum number of iterations before failure."}	
+	},
+    Outputs => {
+	List => {"The resulting codeword."}
+	},
+    "Attempts to decode the vector v relative to the parity check matrix H using a message passing decoding algorithm. The matrix H and the vector v must have entries in GF(2). Returns the empty list if maxI is exceeded. ",
+    "At each iteration, this function flips all the bits of v that fail the maximum number of parity check equations from H. This is experimental because it has not been fully tested. The output is only guarenteed to be a codeword of the code defined by H.",
+    EXAMPLE {
+	"R=GF(2);",
+	"H := matrix(R, {{1,1,0,0,0,0,0},{0,1,1,0,0,0,0},{0,1,1,1,1,0,0},{0,0,0,1,1,0,0},{0,0,0,0,1,1,0},{0,0,0,0,1,0,1}});",
+	"v := vector transpose matrix(R, {{1,0,0,1,0,1,1}});",
+	"bitflipDecode(H,v,100)"
+	}
+    }
 document {
     Key => {tannerGraph, (tannerGraph,Matrix)},
     Headline => "Outputs the Tanner graph associated with the given parity check matrix",
@@ -3090,28 +3083,24 @@ document {
 	}
     }
 
-doc ///
-	Key
-		enumerateVectors
-                (enumerateVectors, Ring, List)
-	Headline
-		a way to enumerate vectors over a finite field with a given set of non-zero coordinates
-	Usage
-		enumerateVectos(F, L)
-	Inputs
-		L:List
-		F:GaloisField
-	Outputs
-		:List
-	Description
-		Text
-			Given a 0,1 valued list {\tt L}, return a list of all the possible ways to replace the
-                        one values in {\tt L} with a nonzero element of the finite field {\tt F}.
-		Example
-			F = GF(3);
-	                enumerateVectors(F, {1,0,1,0,1})
-///
-
+document {
+    Key => {enumerateVectors, (enumerateVectors, Ring, List)},
+    Headline => "A way to enumerate vectors over a finite field with a given set of non-zero coordinates",
+    Usage => "enumerateVectors(F, L)",
+    "Given a 0,1 valued list L, return a list of all the possible ways to replace the",
+    " one values in L with a nonzero element of the finite field F.",
+    Inputs => {
+	"F" => Ring => {"The finite field of the resulting lists entries."},
+	"L" => List => {"A 0,1 valued list."}
+	},
+    Outputs => {
+	List => {"A list of lists that correspond to all possible vectors over F that have the same set of nonzero entries as L."}
+	},
+    EXAMPLE {
+	"F = GF(3);",
+	"enumerateVectors(F, {1,0,1,0,1})"
+	}
+    } 
 document {
     Key => {randLDPC, (randLDPC, ZZ, ZZ, RR, ZZ)},
     Headline => "Generates a low density family of parity check matrices with given parameters",
@@ -3171,33 +3160,26 @@ document {
  }
  
 
-doc ///
-	Key
-		footPrint
-                (footPrint,ZZ,ZZ,Ideal)
-	Headline
-		gives the value of the generalized footprint function of the ideal I at (d,r)
-	Usage
-		footPrint(d,r,I)
-	Inputs
-		I:ideal
-                d:ZZ
-                r:ZZ
-	Outputs
-		:ZZ
-	Description
-		Text
-			Value of the generalized footprint function of I at (d,r).
-                        Definition of the generalized footprint function can be found at Definition 1.3 at \url{https://arxiv.org/pdf/1812.06529.pdf}
-                        Given an ideal $I$, a monomial is called standard of $I$ if it is not a leading monomial of any polynomial of $I$. The footprint function
-                        compute the number of standard monomials.
-
-		Example
-			K=QQ;
-                        R=K[t1,t2,t3];
-                        I=ideal(t1^3,t2*t3);
-                        footPrint(2,3,I)
-///
+ document {
+   Key => {footPrint, (footPrint,ZZ,ZZ,Ideal)},
+   Headline => "Gives the value of the generalized footprint function of the ideal I at (d,r)",
+   Usage => "footPrint(d,r,I)",
+   Inputs => {
+	"I" => Ideal => {"Graded ideal."},
+	"d" => ZZ => {"Polynomials up to degree d are used."},
+	"r" => ZZ => {"Number of linearly independent polynomials that are used."}
+	},
+   Outputs => {
+	"i" => ZZ => {"Value of the generalized footprint function of I at (d,r)."}
+	},
+    	"Definition of the generalized footprint function can be found at Definition 1.3 at https://arxiv.org/pdf/1812.06529.pdf ",
+	EXAMPLE {
+	"K=QQ;", 
+        "R=K[t1,t2,t3];",
+        "I=ideal(t1^3,t2*t3);",
+        "footPrint(2,3,I)"
+	}
+ }
     
 
     
@@ -3271,183 +3253,147 @@ document {
 
 
 
-doc ///
-	Key
-		alphabet
-		(alphabet,LinearCode)
-	Headline
-		recover all the elementos of the base ring
-	Usage
-		alphabet(C)
-	Inputs
-		C: LinearCode
-	Outputs
-		: List $L$
-	Description
-		Text
-			{\tt C} is a linear code, the function checks if the base ring is ZZ/p and then computes the elements of the ring additively, otherwise computes them by taking a generator of the multiplicative group.
-
-		Example
-			F=GF(4, Variable=>a);
-			C=linearCode(matrix{{1,a,0},{0,1,a}});
-    	    	    	alphabet(C)
-///
-
-doc ///
-	Key
-		ambientSpace
-		(ambientSpace,LinearCode)
-		(quasiCyclicCode,GaloisField,List)
-	Headline
-		recover the ambient module the code is subspace of
-	Usage
-		ambientSpace C
-	Inputs
-		C: LinearCode
-	Outputs
-		: Module
-	Description
-		Text
-			{\tt C} is the linear code and  extract the key AmbientModule of the hash table LinearCode.
-  
-		Example
-			F=GF(4,Variable=>a);
-                        C=linearCode(matrix{{1,a,0},{0,1,a}});
-                        ambientSpace C
-///
-
-doc ///
-	Key
-		codewords
-                (codewords, LinearCode)
-	Headline
-		compute all the codewords of the code
-	Usage
-		codewords(C)
-	Inputs
-		C:LinearCode
-	Outputs
-		:List
-	Description
-		Text
-			Obtain the codewords by multiplying all the elements of the ambient space (obtained with the function messages) by the generator matrix of the code {\tt C}.
-
-		Example
-			F=GF(4,Variable=>a);
-                        C=linearCode(matrix{{1,a,0},{0,1,a}});
-                        codewords(C)
-///
-
-doc ///
-	Key
-		cyclicMatrix
-                (cyclicMatrix, List)
-                (cyclicMatrix, GaloisField, List)
-	Headline
-		contruc the cyclic matrix generated by a vector
-	Usage
-		cyclicMatrix(v)
-                cyclicMatrix(F,v)
-	Inputs
-		v:List
-		F:GaloisField
-	Outputs
-		:Matrix 
-                         $M$
-		
-	Description
-		Text
-			We present below the different ways in how a cyclic Matrix $M$ can be defined.
-    Synopsis
-    	Heading
-		a vector(List) is given
-	BaseFunction
-		cyclicMatrix
-	Usage
-		cyclicMatrix(v)
-	Inputs
-		v:List
-	Outputs
-		:Matrix
-			$M$
-	Description
-		Text
-			A cyclic matrix (also known as circulant matrix) is a matrix generated by the cyclic permutations of the first row of it. 
-                        This function computes the matrix $M$ by taking as the i-th row the entries of {\tt v} list from -i to n-i module n.
-		Example
-			v=toList(1,0,2,0);
-			M =cyclicMatrix(v)
-                        
-    Synopsis
-    	Heading
-		a finite field and a list are given
-	BaseFunction
-		cyclicMatrix
-	Usage
-		quasiCyclicCode(v,F)
-	Inputs
-		v:List
-		F:GaloisField
-	Outputs
-		:cyclicMatrix
-			$M$
-	Description	    
-		Text
-			A cyclic matrix (also known as circulant matrix) is a matrix generated by the cyclic permutations of the first row of it. 
-                        This function coerced the elements of {\tt v} into the field {\tt F}.
-                        Computes the matrix $M$ by taking as the i-th row the entries of {\tt v} list from -i to n-i module n.
-		Example
-			F=GF(4,Variable=>a);
-                        v={0,1,a};
-                        M=cyclicMatrix(F,v)
-                        
-///
-
-doc ///
-	Key
-		dualCode
-                dualcode(LinearCode)
-	Headline
-		compute the dual of a given code
-	Usage
-		dualCode(C)
-	Inputs
-		C:LinearCode
-	Outputs
-		:LinearCode
-			$D$
-	Description
-		Text    
-                        The dual of a code {\tt C} of length n over the field F are the elements v in F^n such that for any c in {\tt C}, the inner product <c,v> is equal to zero. 
-                        These are the functionals whose image are zero over the code, this is the dual module of F^n/C.
-																																																																																																																																																																																																																																																																																																																																																																																																																																								
-		Example
-			F=GF(4,Variable=>a);
-                        C=linearCode(matrix{{1,a,0},{0,1,a}});
-                        D=dualCode(C)
-///
+document {
+    
+    Key => {alphabet, (alphabet, LinearCode)},
+    
+    Headline => "Recover all the elements of the base ring",
+    
+    Usage => "alphabet(C)",
+    
+    Inputs => {
+    "C" => LinearCode => {"The code over the ring which forms the alphabet."}
+    },
+    
+    Outputs => {
+    List => {"A list of the base ring elements."}
+    },
+    "Checks if the base ring is ZZ/p and then computes the elements of the ring additively, otherwise computes them by taking a generator of the multiplicative group.",
+    
+    EXAMPLE {
+    "F=GF(4, Variable=>a);",
+    "C=linearCode(matrix{{1,a,0},{0,1,a}});",
+    "alphabet(C)"
+    }
+    }
+document {
+    Key => {ambientSpace, (ambientSpace, LinearCode)},
+    
+    Headline => "Recover the ambient module the code is subspace of",
+    
+    Usage => "ambientSpace C",
+    
+    Inputs => {
+    "C" => LinearCode => {"The code, a subspace of the ambient space."}
+    },
+    Outputs => {
+    Module => {"The space of the code."}
+    },
+    
+    "Extract the key AmbientModule of the hash table LinearCode.",
+    
+    EXAMPLE {
+    "F=GF(4,Variable=>a)",
+    "C=linearCode(matrix{{1,a,0},{0,1,a}})",
+    "ambientSpace C"
+    }
+    }
+document {
+    Key => {codewords, (codewords, LinearCode)},
+    
+    Headline => "Compute all the codewords of the code",
+    
+    Usage => "codewords(C)",
+    
+    Inputs => {
+    "C" => LinearCode => {"The linear code to extract the codewords of."}
+    },
+    
+    Outputs =>{
+    List => {"The list of the codewords in C."}
+    },
+    
+    "Obtain the codewords by multiplying all the elements of the ambient space (obtained with the function messages) by the generator matrix of the code C.",
+    
+    EXAMPLE {
+    "F=GF(4,Variable=>a)",
+    "C=linearCode(matrix{{1,a,0},{0,1,a}})",
+    "codewords(C)"
+    }
+    }
+document {
+    Key => {cyclicMatrix, (cyclicMatrix,List),(cyclicMatrix, GaloisField,List)},
+    
+    Headline => "The cyclic matrix generated by a vector",
+    
+    Usage => "M=cyclicMatrix(v)\n M=cyclicMatrix(F,v)",
+    
+    Inputs => {
+    "v" => List => {"A tuple of elements with works as the first row of the cyclic matrix."},
+    "F" => GaloisField => {"The field where the matrix will have its entries."}
+    },
+    
+    Outputs => {
+    Matrix => {"A cyclic matrix generated by v."}
+    },
+    
+    "A cyclic matrix (also known as circulant matrix) is a matrix generated by the cyclic permutations of the first row of it. This function computes the matrix by taking as the i-th row the entries of v list from -i to n-i module n.",
+    
+    EXAMPLE {
+    "F=GF(4,Variable=>a)",
+    "v={0,1,a}",
+    "M=cyclicMatrix(F,v)"
+    }
+    }
+document {
+    Key => {dualCode, (dualCode,LinearCode)},
+    
+    Headline => "Compute the dual of a given code",
+    
+    Usage => "D=dualCode(C)",
+    
+    Inputs => {
+    "C" => LinearCode => {"A linear code of dimension k and length n."}
+    },
+    
+    Outputs => {
+    LinearCode => {"The dual of C, a code of dimension n-k."}
+    },
+    
+    "The dual of a code C of length n over the field F are the elements v in F^n such that for any c in C, the inner product <c,v> is equal to zero. These are the functionals whose image are zero over the code, this is the dual module of F^n/C.",
+    
+    EXAMPLE {
+    "F=GF(4,Variable=>a)",
+    "C=linearCode(matrix{{1,a,0},{0,1,a}})",
+    "D=dualCode(C)"
+    }
+    }
  
-doc ///
-	Key
-		field
-                (field, LinearCode)
-	Headline
-		returns the field where the entries of the codewords belong
-	Usage
-		(field, LinearCode)
-	Inputs
-		C:LinearCode
-	Outputs
-		:Ring
-	Description
-		Text
-			Return the base field of the code.
-        Example
-			F=GF(4,Variable=>a);
-                        C=linearCode(matrix{{1,a,0},{0,1,a}});
-                        field C
-///
+document {
+    
+    Key => {field,(field,LinearCode)},
+    
+    Headline => "Returns the field where the entries of the codewords belong.",
 
+    
+    Usage => "field C",
+    
+    Inputs => {
+    "C" => LinearCode => {}
+    },
+    
+    Outputs => {
+    Ring => {"The base field of the code."}
+    },
+    
+    "Return the base field of the code.",  
+    
+    EXAMPLE {
+    "F=GF(4,Variable=>a)",
+    "C=linearCode(matrix{{1,a,0},{0,1,a}})",
+    "field C"
+    }
+    }
 document {
     
     Key => {genericCode, (genericCode, LinearCode)},
@@ -3626,33 +3572,29 @@ document {
     SeeAlso => {"codewords"}
     }
 
-doc ///
-	Key
-		cyclicCode
-		(cyclicCode, GaloidField, RingElement, ZZ)
-                
-	Headline
-	       given a polynomial generates a cyclic code of lenght n over the GaloisField
-	Usage
-		quasiCyclicCode(F, g, n)
-	Inputs
-		F:GaloisField
-                g:RingElement
-                n.ZZ
-	Outputs
-		:LinearCode
-			$C$
-	Description
-		Text
-			{\tt g} is a polynomial over {\tt F} and {\tt n} is an integer.
-                        if {\tt g} is a divisor of $x^n-1$, then returns a Code with generating polynomial {\tt g} and lenght {\tt n}.	
-                                   Otherwise Returns a code with a circulant matrix as generating matrix.
-		Example
-			F=GF(5);
- 	                R=F[x];
- 	                g=x-1;
- 	                C=cyclicCode(F,g,8)
-///
+document {
+     Key => {cyclicCode, (cyclicCode, GaloisField , RingElement, ZZ), (cyclicCode,GaloisField,ZZ,ZZ)},
+     Headline => "Given a polynomial generates a cyclic code of lenght n over the GaloisField",
+     Usage => "cyclicCode(F ,g, n)",
+     Inputs => {
+         "F" => GaloisField => {"The Ring of coefficients of the polynomial."},
+ 	"g" => RingElement => {"A polynomial with coefficients in F."},
+ 	"n" => ZZ => {"The lenght of the code."}
+ 	},
+
+      Outputs => {
+ 	  "C" => LinearCode => {"if g is a divisor of x^n-1 Cyclic returns a Code with generating polynomial g and lenght n.\n	
+                                   Else  Returns a code with a circulant matrix as generating matrix."}
+ 	  },
+       "g is a polynomial over F and n is an integer.\n",
+       "Returns the Cyclic code with generating polynomial g over F and lenght n.",
+       EXAMPLE {
+ 	  "F=GF(5);",
+ 	   "R=F[x];",
+ 	   "g=x-1;",
+ 	   "C=cyclicCode(F,g,8);"
+ 	   }
+         }
 
 doc ///
 	Key
@@ -3758,77 +3700,38 @@ doc ///
 		LocallyRecoverableCode({13,9,4,2},A,g)
 ///
 
-doc ///
-	Key
-		evaluationCode
-                (evaluationCode, Ring, List, List)
-                (evaluationCode, Ring, List, Matrix)
-	Headline
-		an evaluation code construction
-	Usage
-		evaluationCode(F,P,S)
-                evaluationCode(F,P,M)
-	Inputs
-		F:Ring
-                P:List
-                S:List
-                M:Matrix
-	Outputs
-		:EvaluationCode
-			$C$
-	Description
-		Text
-			We present below the different ways in how a evaluation
-			code $C$ can be defined.
-    Synopsis
-    	Heading
-		a ring and a two lists are given
-	BaseFunction
-		evaluationCode
-	Usage
-		quasiCyclicCode(F,P,S)
-	Inputs
-		F:Ring
-                P:List
-                S:List
-	Outputs
-		:EvaluationCode
-			$C$
-	Description
-		Text
-			Given a finite field {\tt F}, an ordered list {\tt P} of points in an affine space F^m, and an ordered list {\tt S} of polynomials over {\tt F} in $m$ variables.
-                        This method produces a linear code $C$ generated by codewords obtained by evaluating the given polynomials at the given points.
-		Example
-			F=GF(4);
-                        R=F[x,y,z];
-	                P={{0,0,0},{1,0,0},{0,1,0},{0,0,1},{1,1,1},{a,a,a}};
-                        S={x+y+z,a+y*z^2,z^2,x+y+z+z^2};
-	                C=evaluationCode(F,P,S)
-    Synopsis
-    	Heading
-		a ring, a list and a matrix are given
-	BaseFunction
-		evaluationCode
-	Usage
-		quasiCyclicCode(F,P,M)
-	Inputs
-		F:Ring
-                P:List
-                M:Matrix
-	Outputs
-		:EvaluationCode
-			$C$
-	Description
-		Text
-			Given a finite field {\tt F}, an ordered list {\tt P} of points in an affine space F^m, and an ordered list {\tt S} of polynomials over {\tt F} in $m$ variables.
-                        This method produces a linear code $C$ generated by codewords obtained by evaluating the monomials defined for the matrix {\\ M} at the given points.
-		Example
-			F=GF(4);
-                        R=F[x,y,z];
-	                P={{0,0,0},{1,0,0},{0,1,0},{0,0,1},{1,1,1},{a,a,a}};
-                        M=matrix{{0,0,1},{1,1,1}};
-	                C=evaluationCode(F,P,M)
-///
+
+
+
+document {
+    Key => {evaluationCode, (evaluationCode,Ring,List,List), (evaluationCode,Ring,List,Matrix)},
+    Headline => "An evaluation code construction",
+    Usage => "evaluationCode(F,P,S)\nevaluationCode(F,P,M)",
+    Inputs => {
+	"F" => Ring => {"A finite field."},
+	"P" => List => {"A list of points in F^m."},
+	"S" => List => {"A set of polynomials over F in m variables."}, 
+	"M" => Matrix => {"Matrix whose rows are the exponents of the monomials to evaluate."}
+	},
+    Outputs => {
+	"C" => EvaluationCode => {"Evaluation code."}
+	},
+    "Given a finite field F, an ordered list of points in an affine space F^m, and an ordered list of polynomials over F in m variables.\n",
+    "This method produces a linear code generated by codewords obtained by evaluating the given polynomials at the given points. ",
+    "In the case when the polynomials are monomials, one may give the matrix of exponent vectors instead of the list of polynomials.\n",
+    EXAMPLE {
+	"F=GF(4);",
+	"R=F[x,y,z];",
+	"P={{0,0,0},{1,0,0},{0,1,0},{0,0,1},{1,1,1},{a,a,a}};",
+	"S={x+y+z,a+y*z^2,z^2,x+y+z+z^2};",
+	"C=evaluationCode(F,P,S);",
+	"C.VanishingIdeal",
+	"C.PolynomialSet",
+	"C.LinearCode",
+	"length C.LinearCode",
+	"dim C.LinearCode"
+	}
+    }
 
 document {
     Key => {toricCode, (toricCode,Ring,Matrix)},
@@ -3856,96 +3759,31 @@ document {
 	}
     }
 
-doc ///
-	Key
-	        cartesianCode
-		(cartesianCode, Ring, List, List)
-		(cartesianCode, Ring, List, ZZ)
-                (cartesianCode, Ring, List, Matrix)
-	Headline
-		constructs a quasi-cyclic code
-	Usage
-		(cartesianCode, Ring, List, List)
-		(cartesianCode, Ring, List, ZZ)
-                (cartesianCode, Ring, List, Matrix)
-	Inputs
-		F:Ring
-                L:List
-                S:List
-                d:ZZ
-                M:Matrix
-	Outputs
-		:EvaluationCode
-			$C$
-	Description
-		Text
-			We present below the different ways in how a cartesian
-			code $C$ can be defined.
-    Synopsis
-    	Heading
-		a ring is given, a list is given and a integer is given
-	BaseFunction
-		cartesianCode
-	Usage
-		cartesianCode(F, L, d)
-	Inputs
-		F:Ring
-		L:List
-                d:ZZ
-	Outputs
-		:evaluationCode
-			$C$
-	Description	    
-		Text
-			{\tt F} is a field, {\tt L}  is a list of sets of {\tt F} and {\tt d} is an integer.
-                        Returns the Cartesian code $C$ obtained when polynomials up to degree d are evaluated over the points on the Cartesian product made by the sets of {\tt L}.
-		Example
-			C=cartesianCode(ZZ/11,{{1,2,3},{2,6,8}},3)
-   Synopsis
-    	Heading
-		a ring is given tow list are given
-	BaseFunction
-		cartesianCode
-	Usage
-		cartesianCode(F, L, S)
-	Inputs
-		F:Ring
-                L:List
-                S:List
-	Outputs
-		:evaluationCode
-			$C$
-	Description	    
-		Text
-			{\tt F} is a field, {\tt L}  is a list of sets of {\tt F} and {\tt S} is the set of polynomials to evaluate.
-                        Returns the Cartesian code $C$ obtained when polynomials defined in the list {\tt S} are evaluated over the points on the Cartesian product made by the sets of {\tt L}.
-		Example
-			F=GF(4)
-                        R=F[x,y];
-                        C=cartesianCode(F,{{0,1,a},{0,1,a}},{1+x+y,x*y})
- Synopsis
-    	Heading
-		a ring is given, a list is given and a Matrix is given
-	BaseFunction
-		cartesianCode
-	Usage
-		cartesianCode(F, L, M)
-	Inputs
-		F:Ring
-		L:List
-                M:Matrix
-	Outputs
-		:evaluationCode
-			$C$
-	Description	    
-		Text
-			{\tt F} is a field, {\tt L}  is a list of sets of {\tt F} and {\tt M} is the matrox whose rows are the exponents of the monomials to evaluate.
-                        Returns the Cartesian code $C$ obtained when polynomials defined by the matrix {\tt M$ are evaluated over the points on the Cartesian product made by the sets of {\tt L}.
-		Example
-			F=GF(4)
-                        R=F[x,y];
-                        C=cartesianCode(F,{{0,1,a},{0,1,a}},matrix{{1,2},{2,3}})
-///
+document {
+    Key => {cartesianCode, (cartesianCode,Ring,List,List), (cartesianCode,Ring,List,ZZ), (cartesianCode,Ring,List,Matrix)},
+    Headline => "Constructs a Cartesian code",
+    Usage => "cartesianCode(F,L,S)\ncartesianCode(F,L,d)\ncartesianCode(F,L,M)",
+    Inputs => {
+	"F" => Ring => {"Field."},
+	"L" => List => {"Sets of F to make a Cartesian product."},
+	"S" => List => {"Sets of polynomials to evaluate."},
+	"d" => ZZ => {"Polynomials up to dedree d will be evaluated."}, 
+	"M" => Matrix => {"Matrix whose rows are the exponents of the monomials to evaluate."}
+	},
+    Outputs => {
+	"C" => EvaluationCode => {"Cartesian code."}
+	},
+    "F is a field, L  is a list of sets of F and d is an integer.\n",
+    "Returns the Cartesian code obtained when polynomials up to degree d are evaluated over the points on the Cartesian product made by the sets of L.",
+    EXAMPLE {
+	"C=cartesianCode(ZZ/11,{{1,2,3},{2,6,8}},3);",
+	"C.Sets",
+	"C.VanishingIdeal",
+	"C.PolynomialSet",
+	"C.LinearCode",
+	"length C.LinearCode"	
+	}
+    }
 
 document {
     Key => {RMCode, (RMCode,ZZ,ZZ,ZZ)},
@@ -3983,7 +3821,7 @@ document {
     Outputs => {
 	"C" => EvaluationCode => {"Reed-Solomon code."}
 	},
-    "F is a finite field, $L={a_1,...,a_n}$ contains the elements to evaluate, polynomials of degree less than k are used to evaluate.\n",
+    "F is a finite fiel, $L={a_1,...,a_n}$ contains the elements to evaluate, polynomials of degree less than k are used to evaluate.\n",
     "Returns the Reed-Solomon code obtained when polynomials of degree less than k are evaluated on the elements of L.",
     EXAMPLE {
 	"C=RSCode(ZZ/31,{1,2,3},3);",
@@ -4038,31 +3876,29 @@ document {
  	}
      }
 
-doc ///
-	Key
-		evCodeGraph
-                (evCodeGraph,Ring,Matrix,List)
-	Headline
-		constructs a Reed–Muller-type code over a graph
-	Usage
-		evCodeGraph(F,M,S)
-	Inputs
-		R:Ring
-		M:Matrix
-                S:List
-	Outputs
-		:EvaluationCode
-			$C$
-	Description
-		Text
-			Given a field {\tt F} of prime characteristic, a incidence matrix {\tt M} of a connected graph $G$, and an ordered list {\tt S} of polynomials over {\tt F}.
-                        This method produces an evaluation code $C$ generated by the incidence matrix of the graph $G$ by evaluating the given polynomials at the columns of the incidence matrix.
-		Example
-			G = graph({1,2,3,4}, {{1,2},{2,3},{3,4},{4,3}});
-                        B=incidenceMatrix G;
-                        S=ZZ/2[t_(0)..t_(#vertexSet G-1)];
-                        Y=evCodeGraph(coefficientRing S,B,flatten entries basis(1,S))
-///
+
+
+document {
+    Key => {evCodeGraph, (evCodeGraph,Ring,Matrix,List)},
+    Headline => "Constructs a Reed–Muller-type code over a graph",
+    Usage => "evCodeGraph(F,M,S)",
+    Inputs => {
+        "F" => Ring => {"Field."},
+	"M" => Matrix => {"The incidence matrix of the connected graph G."},
+	"S" => List => {"A list of polynomials over F."}
+    },
+    Outputs => {
+        "C" => EvaluationCode => {"Evaluation code over a graph."}
+    },
+    "Given a field F of prime characteristic, a incidence matrix M of a connected graph G, and an ordered list of polynomials over F. ",
+    "This method produces an evaluation code generated by the incidence matrix of the graph G by evaluating the given polynomials at the columns of the incidence matrix.",
+    EXAMPLE {
+   "G = graph({1,2,3,4}, {{1,2},{2,3},{3,4},{4,3}});",
+   "B=incidenceMatrix G;",
+   "S=ZZ/2[t_(0)..t_(#vertexSet G-1)];",
+   "Y=evCodeGraph(coefficientRing S,B,flatten entries basis(1,S))"
+	}
+    }
 
 
 document {
