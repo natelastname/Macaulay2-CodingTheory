@@ -1951,7 +1951,7 @@ K=ZZ/3
 R=K[t3,t2,t1,MonomialOrder=>Lex]
 I=ideal(t1*t2^2-t1^2*t2,t1*t3^3-t1^3*t3,t2*t3^3-t2^3*t3)
 vNumber(I)
-assert(vNumber(I)==regularity coker gens gb I-1)
+assert(vNumber(I) == (regularity coker gens gb I)-1)
 ///
 
 TEST ///
