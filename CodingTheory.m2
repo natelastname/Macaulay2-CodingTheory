@@ -67,7 +67,7 @@ export {
     "VanishingIdeal",
     "PolynomialSet",
     "ExponentsMatrix",
-    "IncidenceMatrix",
+--    "IncidenceMatrix",
     "Sets",
     "evaluationCode",
     "toricCode",
@@ -88,7 +88,7 @@ export {
     "cyclicCode",
     
     -- LRC codes
-    "LocallyRecoverableCode",
+    "locallyRecoverableCode",
     "getLRCencodingPolynomial",
     
     -- Methods
@@ -1117,8 +1117,8 @@ cyclicCode(GF(7),5,4)
 --     Helper functions for constructing 
 --             LRC CODES
 -------------------------------
-LocallyRecoverableCode = method(TypicalValue => LinearCode)
-LocallyRecoverableCode(List,List,RingElement) := LinearCode => (L,A,g) -> (
+locallyRecoverableCode = method(TypicalValue => LinearCode)
+locallyRecoverableCode(List,List,RingElement) := LinearCode => (L,A,g) -> (
     -- generate a linear Locally Recoverable Code.
     -- input:   L={q,n,k,r}  alphabet size q, target code length n, dimension k, and locality r.
     --          A is a partition of n symbols from the alphabet,
@@ -1189,7 +1189,7 @@ getLRCencodingPolynomial(ZZ,ZZ,List,RingElement) := RingElement => (k,r,informat
  A={{1,3,9},{2,6,5},{4,12,10}}
  R=p.BaseField[x]
  g=x^3
- LocallyRecoverableCode(p,A,g)
+ locallyRecoverableCode(p,A,g)
  *-
 
 
@@ -2297,7 +2297,7 @@ assert( dim C.LinearCode==7)
  q=13
  R=ZZ/(q)[x]
  g=x^4
- C=LocallyRecoverableCode({q,n,k,r},A1,g)
+ C=locallyRecoverableCode({q,n,k,r},A1,g)
  assert( rank(C.GeneratorMatrix)==k )
  sampleWords=(entries C.GeneratorMatrix)_{2,3}
  evaluations=apply(sampleWords,i->toList set apply(i,j->g[j]%q))
@@ -2684,108 +2684,232 @@ doc ///
 			C=linearCode(p,r,n,L)
 ///
 
+doc ///
+        Key
+               AmbientModule
+        Headline
+                the ambient module of a code
+        Usage
+                C.AmbientModule
+        Inputs
+                C:LinearCode
+        Outputs
+                :Module
+                           
+        Description
+                Text
+                        Given a linear code {\tt C} of length $n$ over a Galois Field $F$,  
+                        this symbol is used as a key for storing the free module $F^n$,  
+                        which is referred to as the Ambient Module of {\tt C}.
+         	Text 
+		    	This symbol is provided by the package @TO CodingTheory@.
+                Example
+                               C = linearCode(GF(4,Variable => a), {{1,0,a,0,0},{0,a,a+1,1,0},{1,1,1,a,0}})
+                               C.AmbientModule
+                        
+			       
+///
 
+doc ///
+        Key
+               BaseField
+        Headline
+                the field of a code
+        Usage
+                C.BaseField
+        Inputs
+                C:LinearCode
+        Outputs
+                :GaloisField   
+        Description
+                Text
+                        Given a linear code {\tt C} over a Galois field $F$, 
+                        this symbol is used as a key for storing the Galois field $F$.
+         	Text 
+		    	This symbol is provided by the package @TO CodingTheory@.
+                Example
+                               C = linearCode(GF(8,Variable => b), {{1,0,b,0,0},{0,b,b+1,1,0},{1,1,1,b,0}})
+	                       C.BaseField
+///
 
+doc ///
+    Key 
+      Code
+    Headline
+      a code as image
+    Usage
+      C.Code
+    Inputs
+      C:LinearCode
+    Outputs
+      :Module
+    Description
+         Text
+            Given a linear code {\tt C}, this symbol is used as a key for storing {\tt C} as the
+            image of some mapping between finitely generated modules,
+            where each module is over the same Galois field.
+         Text 
+            This symbol is provided by the package @TO CodingTheory@.
+         Example
+            C = linearCode(GF(8,Variable => b), {{1,1,b,0,0},{0,b,b,1,0},{1,1,1,b,0}});
+	    C.Code
+///
 
-document {
-    Key => ParityCheck,
-    Headline => "Optional input for the linearCode constructor",
-    Usage => "linearCode(..., ParityCheck => ...)",
-    "ParityCheck is a Boolean symbol: false, true. Defalt value is false.",
-    EXAMPLE {
-	    "F = GF(4,Variable => a);",
-	    "L = {{1,0,a,0,0},{0,a,a+1,1,0},{1,1,1,a,0}};",
-	    "M = matrix L;",
-	    "C = linearCode(F,L,ParityCheck => true)",
-	    "C.GeneratorMatrix",
-	    "C.ParityCheckMatrix"
-	    }
-    }
+doc ///
+    Key 
+      ExponentsMatrix
+    Headline
+     specifies the matrix of exponentes
+    Usage
+      C.Code
+    Inputs
+      C:EvaluationCode
+    Outputs
+      :Matrix
+    Description
+         Text
+            This symbol is used as a key for storing the matrix of exponents,
+            which is used for the function @TO toricCode@.
+         Text
+            This symbol is provided by the package @TO CodingTheory@.
+	 Example
+		   M=matrix{{1,4},{2,5},{10,6}};
+	           T=toricCode(GF 4,M);
+	           T.ExponentsMatrix
+///
 
-document {
-    Key => AmbientModule,
-    Headline => "The ambient module of a linear Code",
-    "Given a linear code C of length n over a Galois Field F, this internal key returns the free module F^n, which is refered to as the Ambient Module of C.",
-    EXAMPLE {
-	"C = linearCode(GF(4,Variable => a), {{1,0,a,0,0},{0,a,a+1,1,0},{1,1,1,a,0}})",
-	"C.AmbientModule"
-	},
-    PARA{"This symbol is provided by the package ", TO CodingTheory, "."},
-    SeeAlso => {"ambientSpace"},
-    }
+doc ///
+    Key 
+      GeneratorMatrix
+    Headline
+      gives the generator matrix of a linear code
+    Usage
+            C.GeneratorMatrix
+    Inputs
+            C:LinearCode
+    Outputs
+            :Matrix
+    Description
+         Text
+            given a linear code {\tt C}, this symbol is used as a key for storing
+            a generator matrix of {\tt C}.
+         Text 
+            This symbol is provided by the package @TO CodingTheory@.
+         Example
+            C = linearCode(GF(8,Variable => b), {{1,1,b,0,0},{0,b,b,1,0},{1,1,1,b,0}});
+	    C.GeneratorMatrix
+///
 
-document {
-    Key => BaseField,
-    Headline => "The Galois Field of a code",
-    "Given a linear code C of length n over a Galois Field F, this internal key it returns the Galois Field F.",
-    EXAMPLE {
-	"C = linearCode(GF(8,Variable => b), {{1,0,b,0,0},{0,b,b+1,1,0},{1,1,1,b,0}})",
-	"C.BaseField"
-	},
-    PARA{"This symbol is provided by the package ", TO CodingTheory, "."},
-    SeeAlso => {"ring","alphabet"},
-    }
+doc ///
+    Key 
+      Generators
+    Headline
+      list of generators of a code
+    Usage
+      C.Generators
+    Inputs
+      C:LinearCode
+    Outputs
+      :List
+    Description
+         Text
+            Given a linear code {\tt C}, this symbol is used as a key for 
+            storing the list of rows of a generator matrix of {\tt C}.
+         Text 
+            This symbol is provided by the package @TO CodingTheory@.
+         Example
+            C = linearCode(GF(8,Variable => a), {{1,1,a,0,0},{0,a,a,1,0},{1,1,1,a,0}});
+	    C.Generators
+///
 
-document {
-    Key => Generators,
-    Headline => "Generators of a linear code",
-    "Given a linear code C with generator matrix G, this internal key returns the rows of G as a list.",
-    EXAMPLE {
-	"C = linearCode(GF(8,Variable => a), {{1,1,a,0,0},{0,a,a,1,0},{1,1,1,a,0}})",
-	"C.Generators",
-	"C.GeneratorMatrix"
-	},
-    PARA{"This symbol is provided by the package ", TO CodingTheory, "."},
-    SeeAlso => {"reduceMatrix","GeneratorMatrix"},
-    }
+-*
+doc ///
+    Key 
+      IncidenceMatrix
+    Headline
+      gives the incident matrix of a graph
+    Description
+         Text
+            This symbol is provided by the package @TO CodingTheory@.
+///
+*-
 
-document {
-    Key => GeneratorMatrix,
-    Headline => "Generator Matrix of a linear code",
-    "Given a linear code C, this internal key  gives a generator matrix of C.",
-    EXAMPLE {
-	"C = linearCode(GF(8,Variable => b), {{1,1,b,0,0},{0,b,b,1,0},{1,1,1,b,0}})",
-	"C.GeneratorMatrix"
-	},
-    PARA{"This symbol is provided by the package ", TO CodingTheory, "."},
-    SeeAlso => {"reduceMatrix","Generators"},
-    }
+doc ///
+    Key 
+      ParityCheck
+    Headline
+      an optional input for the linearCode constructor
+    Usage
+      linearCode(..., ParityCheck => ...)
+    Description
+         Text
+            This is a Boolean symbol, returns value false or true.
+            The defalt value is false.
+         Text 
+            This symbol is provided by the package @TO CodingTheory@.
+         Example
+            F = GF(4,Variable => a);
+	    L = {{1,0,a,0,0},{0,a,a+1,1,0},{1,1,1,a,0}};
+	    M = matrix L;
+	    C = linearCode(F,L,ParityCheck => true);
+	    C.GeneratorMatrix;
+	    C.ParityCheckMatrix
+///
 
-document {
-    Key => ParityCheckRows,
-    Headline => "Rows of a parity check matrix of a linear code",
-    "Given a linear code C, this internal key  gives a list of the rows of a parity check matrix of C.",
-    EXAMPLE {
-	"C = linearCode(GF(8,Variable => b), {{1,1,b,0,0},{0,b,b,1,0},{1,1,1,b,0}})",
-	"C.ParityCheckRows",
-	"C.ParityCheckMatrix"
-	},
-    PARA{"This symbol is provided by the package ", TO CodingTheory, "."},
-    SeeAlso => {"ParityCheckMatrix","Generators","reduceMatrix","generatorToParityCheck","parityCheckToGenerator"},
-    }
+doc ///
+    Key
+    	ParityCheckMatrix
+    Headline
+    	a parity check matrix of a code
+    Usage
+    	C.ParityCheckMatrix
+    Inputs
+    	C:LinearCode
+    Outputs
+    	:Matrix
+    Description
+    	Text
+	    This symbol is used as a key for storing a parity check matrix of {\tt C}.
+    	Text 
+            This symbol is provided by the package @TO CodingTheory@.
+	Example
+	    C=linearCode(GF(8,Variable => b), {{1,1,b,0,0},{0,b,b,1,0},{1,1,1,b,0}});
+	    C.ParityCheckMatrix
+    SeeAlso
+    	ParityCheckRows
+	Generators
+	reduceMatrix
+	generatorToParityCheck
+	parityCheckToGenerator
+///
 
-document {
-    Key => ParityCheckMatrix,
-    Headline => "A parity check matrix of a linear code",
-    "Given a linear code C, the symbol gives a parity check matrix of C.",
-    EXAMPLE {
-	"C = linearCode(GF(8,Variable => b), {{1,1,b,0,0},{0,b,b,1,0},{1,1,1,b,0}})",
-	"C.ParityCheckMatrix"
-	},
-    PARA{"This symbol is provided by the package ", TO CodingTheory, "."},
-    SeeAlso => {"ParityCheckRows","Generators","reduceMatrix","generatorToParityCheck","parityCheckToGenerator"},
-    }
-
-document {
-    Key => Code,
-    Headline => "A linear code as image",
-    "Given a linear code C, this internal key returns C as the image of some mapping between finitely generated modules, where each module is over the same Galois Field.",
-    EXAMPLE {
-	"C = linearCode(GF(8,Variable => b), {{1,1,b,0,0},{0,b,b,1,0},{1,1,1,b,0}})",
-	"C.Code"
-	},
-    PARA{"This symbol is provided by the package ", TO CodingTheory, "."}
-    }
+doc ///
+    Key
+    	ParityCheckRows
+    Headline
+    	rows of a parity check matrix of a code
+    Usage
+    	C.ParityCheckRows
+    Inputs
+    	C:LinearCode
+    Outputs
+    	:List
+    Description
+    	Text
+	    This symbol is a key to store a list with the rows of a parity check matrix of {\tt C}.
+    	Text 
+            This symbol is provided by the package @TO CodingTheory@.
+	Example
+	    C = linearCode(GF(8,Variable => b), {{1,1,b,0,0},{0,b,b,1,0},{1,1,1,b,0}});
+	    C.ParityCheckMatrix
+	    C.ParityCheckRows
+    SeeAlso
+    	ParityCheckMatrix
+	Generators
+	reduceMatrix
+	generatorToParityCheck
+	parityCheckToGenerator
+///
 
 doc ///
     Key
@@ -3233,23 +3357,24 @@ doc ///
 ///
 
 doc ///
-   Key
-       (toString, LinearCode)
-   Headline
-       A string with the vectors of the generator matrix
-   Usage
-       toString(LinearCode)
-   Inputs
-        C:LinearCode
-	    the linear code $C$.
-   Outputs
-       S:String
-           A string that contains the rows of the generator matrix of C.
-   Description
-       Example
-              L = {{0, 1, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 1, 0, 1, 1, 0, 1, 0, 0}, {1, 1, 0, 0, 0, 1, 0, 0, 1, 0}, {1, 0, 0, 1, 0, 0, 0, 1, 1, 1}}
-	      C = linearCode(GF(2),L)
-	      S=toString C
+        Key
+               (toString, LinearCode)
+        Headline
+                string with the vectors of a generator matrix of a code
+        Usage
+                toString(C)
+        Inputs
+                C:LinearCode
+        Outputs
+                S:String    
+        Description
+                Text
+                        Given a linear code {\tt C}, this function returns a string that 
+                        contains the rows of a generator matrix of {\tt C}.
+                Example
+                               L = {{0, 1, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 1, 0, 1, 1, 0,1, 0, 0}, {1, 1, 0, 0, 0, 1, 0, 0, 1, 0}, {1, 0, 0, 1, 0, 0, 0, 1, 1, 1}}
+	                       C = linearCode(GF(2),L)
+	                       S=toString C
 ///
 
 doc ///
@@ -3465,7 +3590,7 @@ doc ///
 			       K=ZZ/3;
                                R=K[t3,t2,t1,MonomialOrder=>Lex];
                                I=ideal(t1*t2^2-t1^2*t2,t1*t3^3-t1^3*t3,t2*t3^3-t2^3*t3);
-                               vnumber(I)
+                               vNumber(I)
  
 
 ///
@@ -3829,30 +3954,30 @@ doc ///
 	    genericCode(C)
 ///
 
-document {
-    Key => {(dim,LinearCode)},
-    Headline => "Gives the dimension of a linear code C",
-    Usage => "dim C",
-    Inputs => {
-	"C" => LinearCode => {"A linear code over a Galois field."},
-	},
-    Outputs => {
-	Number => {"The dimension of the code C."},
-	},
-    "Given a linear code C, this method returns the dimension of C.",
-    EXAMPLE {
-	"C = linearCode(GF(2),{{1,1,0,0},{0,0,1,1}})",
-	"dim C",
-	"H = hammingCode(2,3)",
-	"dim H",
-	},
-    "We show next the usage od this method to compute the dimension of Evaluation Codes.",
-    EXAMPLE {
-	"RM = reedMullercode(2,2,1);",
-	"dim(RM.LinearCode)"
-	},
-    PARA{"This method is provided by the package ", TO CodingTheory, "."},
-    }
+
+
+doc ///
+        Key
+               (dim,LinearCode)
+        Headline
+                dimension of a linear code
+        Usage
+                dim(C)
+        Inputs
+                C:LinearCode
+        Outputs
+                :Number
+        Description
+                Text
+                        Given a linear code {\tt C}, returns the dimension of    
+                        {\tt C}. The dimension of {\tt C} is defined as the 
+                        dimension of {\tt C} as a vector space.
+		Example
+	                       C = linearCode(GF(2),{{1,1,0,0},{0,0,1,1}});
+	                       dim C
+	                       H = hammingCode(2,3)
+	                       dim H
+///
 
 doc ///
     Key
@@ -3883,60 +4008,72 @@ doc ///
 	    informationRate(RM.LinearCode)
 ///
 
-document {
-    Key => {(size,LinearCode)},
-    Headline => "Gives the number of codewords in a linear code",
-    Usage => "size C",
-    Inputs => {
-	"C" => LinearCode => {"A linear code over a Galois field."},
-	},
-    Outputs => {
-	ZZ => {"The number of codewords in the code C."},
-	},
-    "Given a linear code of length n and dimension k over a Galois Field F with q elements, it computes the number of codewords in C, which is q^k.",
-    EXAMPLE {
-	"R = linearCode(GF(4),{{1,1,1,1}});",
-	"size R",
-	"H = hammingCode(2,3);",
-	"size H",
-	"F = GF(4,Variable=>a);",
-	"L = {{1,a,a+1},{a+1,1,a},{a,a+1,1},{1,0,1}};",
-	"C = linearCode(F,L);",
-	"size C"
-	},
-    "The next is an example of how to use the size method for Evaluation Codes.",
-    EXAMPLE {
-	"RM = reedMullercode(2,2,4);",
-        "size(RM.LinearCode)"
-	},
-    PARA{"This method is provided by the package ", TO CodingTheory, "."},
-    }
+doc ///
+        Key
+               (size,LinearCode)
+        Headline
+                gives the number of codewords in a linear code
+        Usage
+                size C
+        Inputs
+                C:LinearCode
+        Outputs
+                :ZZ       
+        Description
+                Text
+                        Given a linear code {\tt C} of dimension $k$ over a 
+                        Galois field with $q$ elements, returns 
+                        the number of codewords in {\tt C}, which is $q^k$.
+    		Text
+		    This method is provided by the package @TO CodingTheory@.
+		Example
+                               C = linearCode(GF(4),{{1,1,1,1}});
+	                       size C
+	                       H = hammingCode(2,3);
+	                       size H
+	                       F = GF(4,Variable=>a);
+	                       L = {{1,a,a+1},{a+1,1,a},{a,a+1,1},{1,0,1}};
+	                       C = linearCode(F,L);
+	                       size C			       
+                Text
+                        The next example illustrates how to use this function for the class of
+			Evaluation Codes.
+		Example
+	                       RM = reedMullercode(2,3,1);
+	                       size RM.LinearCode
+///
 
-document {
-    Key => {(length,LinearCode)},
-    Headline => "Gives the length of a linear code",
-    Usage => "length C",
-    Inputs => {
-	"C" => LinearCode => {"A linear code over a Galois field."},
-	},
-    Outputs => {
-	ZZ => {"The length of the linear code C."},
-	},
-    "Given a linear code C over a Galois Field, this function returns the number of entries in any codeword in C. ",
-    "This parameter is called the length of the code.",
-    EXAMPLE {
-	"R = linearCode(GF(4),{{1,1,1,1}});",
-	"length R",
-	"H = hammingCode(2,3);",
-	"length H"
-	},
-    "The next example illustrates how to use this method for the class of Evaluation Codes.",
-    EXAMPLE {
-	"RM = reedMullercode(2,3,1);",
-	"length(RM.LinearCode)",
-	},
-    PARA{"This method is provided by the package ", TO CodingTheory, "."},
-    }
+doc ///
+        Key
+               (length,LinearCode)
+        Headline
+                returns the length of a linear code
+        Usage
+                length C
+        Inputs
+                C:LinearCode
+        Outputs
+                :ZZ
+                           
+        Description
+                Text
+                        Given a linear code {\tt C} over a Galois field,
+			returns the number of entries in any codeword in {\tt C}.
+                        This parameter is called the length of the code.			
+    		Text
+		    This method is provided by the package @TO CodingTheory@.
+		Example
+	                       C = linearCode(GF(4),{{1,1,1,1}});
+	                       length C
+	                       H = hammingCode(2,3);
+	                       length H			       
+                Text
+                        The next example illustrates how to use this function for the class of
+			Evaluation Codes.
+		Example
+	                       RM = reedMullercode(2,3,1);
+	                       length RM.LinearCode
+///
 
 doc ///
     Key
@@ -4179,12 +4316,12 @@ doc ///
 
 doc ///
 	Key
-	    LocallyRecoverableCode
-	    (LocallyRecoverableCode,List,List,RingElement)
+	    locallyRecoverableCode
+	    (locallyRecoverableCode,List,List,RingElement)
 	Headline
 	    constructs a locally recoverable code (LRC)
 	Usage
-	    LocallyRecoverableCode(L,A,g)
+	    locallyRecoverableCode(L,A,g)
 	Inputs
 	    L:List
 	    A:List
@@ -4210,7 +4347,7 @@ doc ///
 	    	A={{1,3,9},{2,6,5},{4,12,10}}
 		R=(ZZ/13)[x]
 		g=x^3
-		LocallyRecoverableCode({13,9,4,2},A,g)
+		locallyRecoverableCode({13,9,4,2},A,g)
 ///
 
 doc ///
@@ -4685,40 +4822,83 @@ doc ///
 		are not the expected ones.
 ///
 
-document {
-    Key => ExponentsMatrix,
-    Headline => "Specifies the matrix of exponents. Exponent vectors are rows",
-    TT "ExponentsMatrix", " -- Specifies the matrix of exponents.\n",
-    PARA{"This symbol is provided by the package ", TO CodingTheory, "."}
-    }
-
-document {
-    Key => IncidenceMatrix,
-    Headline => "Specifies the incident matrix of a graph",
-    TT "IncidenceMatrix", " -- Gives the incidence matrix of a graph.\n",
-    PARA{"This symbol is provided by the package ", TO CodingTheory, "."}
-    }
 --------------- Documentation PolynomialSet-----------------
-document {
-    Key => PolynomialSet,
-    Headline => "Specifies a set of polynomials",
-    TT "PolynomialSet", " -- Specifies polynomial set.",
-    PARA{"This symbol is provided by the package ", TO CodingTheory, "."}
-    }
+doc ///
+    Key
+    	PolynomialSet
+    Headline
+    	a set of polynomials for an evaluation code
+    Usage
+    	C.PolynomialSet
+    Inputs
+    	C:EvaluationCode
+    Outputs
+    	:Set
+    Description
+    	Text
+	    This key stores a polynomial set used to construct an
+	    @TO EvaluationCode@.
+    	Text 
+	    This symbol is provided by the package @TO CodingTheory@.
+	Example
+	    F=GF(4,Variable=>a);
+	    R=F[x,y];
+	    P={{0,0},{1,0},{0,1},{a,a}};
+	    S={x+y,x^2+y^2,a+x*y^2};
+	    C=evaluationCode(F,P,S);
+	    C.PolynomialSet
+///
 --------------- Documentation Sets-----------------
-document {
-    Key => Sets,
-    Headline => "Gives the collection of subsets used for constracting a Cartesian code",
-    TT "Sets", " -- Specifies sets.",
-    PARA{"This symbol is provided by the package ", TO CodingTheory, "."}
-    }
+doc ///
+    Key
+    	Sets
+    Headline
+    	sets of a Cartesian code
+    Usage
+    	C.Sets
+    Inputs
+    	C:EvaluationCode
+    Outputs
+    	:List
+    Description
+    	Text
+	    This key stores a list of subsets of a field that are
+	    used for constructing a @TO cartesianCode@.
+	Text
+	    This symbol is provided by the package @TO CodingTheory@.
+	Example
+	    F=GF(4);
+	    R=F[x,y];
+	    C=cartesianCode(F,{{0,1,a},{0,1,a}},{1+x+y,x*y})
+	    C.Sets
+///
+
 --------------- Documentation VanishingIdeal-----------------
-document {
-    Key => VanishingIdeal,
-    Headline => "Gives the vanishing ideal of polynomials in m variables",
-    TT "VanishingIdeal", " -- Specifies vanishing ideal.",
-    PARA{"This symbol is provided by the package ", TO CodingTheory, "."}
-    }
+doc ///
+    Key
+    	VanishingIdeal
+    Headline
+    	vanishing ideal of an evaluation code
+    Usage
+    	C.VanishingIdeal
+    Inputs
+    	C:EvaluationCode
+    Outputs
+    	:Ideal
+    Description
+    	Text
+	    This key stores the vanishing ideal of the set of points that are
+	    used for constructing an @TO EvaluationCode@.
+    	Text
+	    This symbol is provided by the package @TO CodingTheory@.
+    	Example
+	  F=GF(4);
+	  R=F[x,y];
+	  P={{0,0},{1,0},{0,1},{a,a}};
+	  S={x+y,x^2+y^2, a+x*y^2};
+	  C=evaluationCode(F,P,S);
+	  C.VanishingIdeal
+///
 
  
 
