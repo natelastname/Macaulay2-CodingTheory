@@ -2,7 +2,7 @@
 newPackage(
 	"CodingTheory",
     	Version => "1.0", 
-    	Date => "May 1, 2020",
+    	Date => "May 10, 2020",
     	Authors => {
 	     {Name => "Taylor Ball", Email => "trball13@gmail.com"},
 	     {Name => "Eduardo Camps", Email => "camps@esfm.ipn.mx"},
@@ -46,7 +46,7 @@ export {
     -- helper/conversion methods
     "generatorToParityCheck",
     "parityCheckToGenerator",
-    "reduceMatrix",
+    "reducedMatrix",
     
     -- Linear Code
     -- Types and Constructors
@@ -73,9 +73,9 @@ export {
     "toricCode",
     "evCodeGraph",
     "cartesianCode",
-    "reedMullercode",
+    "reedMullerCode",
     "orderCode",
-    "reedSolomoncode",
+    "reedSolomonCode",
     
     -- Families of Codes
     "zeroCode",
@@ -197,8 +197,8 @@ parityCheckToGenerator(Matrix) := Matrix => M -> (
 
 -- If the generator matrix or the parity check matrix is not of full rank, 
 -- choose a subset of rows that are generators.
-reduceMatrix = method(TypicalValue => Matrix)
-reduceMatrix(Matrix) := Matrix => M -> (
+reducedMatrix = method(TypicalValue => Matrix)
+reducedMatrix(Matrix) := Matrix => M -> (
     transpose groebnerBasis transpose M
     )
 
@@ -208,7 +208,7 @@ reduceRankDeficientMatrix(Matrix) := Matrix => M -> (
     if (rank M == min(rank M.source,rank M.target)) then (
 	M
 	) else (
-	reduceMatrix M
+	reducedMatrix M
 	)
     )
 
@@ -561,7 +561,7 @@ minDistBrute LinearCode := Number => C -> (
 minDistMatroidPart = method(TypicalValue => Number)
 minDistMatroidPart LinearCode := ZZ => C -> (
     M := matrix C.Generators;
-    k := rank reduceMatrix(C.GeneratorMatrix);
+    k := rank reducedMatrix(C.GeneratorMatrix);
     n := length C;
     l := ceiling(n/k);
     D := l; --D could probably be modified to be better
@@ -583,7 +583,7 @@ minDistMatroidPart LinearCode := ZZ => C -> (
     dlower := 0;
     while(true) do (
         permutation := join(T_(j-1),toList(0..n-1)-set(T_(j-1)));
-	G := reduceMatrix(M_permutation);
+	G := reducedMatrix(M_permutation);
     	
 	sameWeightWords := apply(subsets(k,w), x -> subsetToList(k,x));
 	sameWeightWords = flatten apply(sameWeightWords, x -> enumerateVectors(ring(C), x));
@@ -620,7 +620,7 @@ minimumWeight LinearCode := ZZ => opts -> C -> (
     
     -- If no strategy specified, try to guess which one to use.
     M := matrix C.Generators;
-    k := rank reduceMatrix(C.GeneratorMatrix);
+    k := rank reducedMatrix(C.GeneratorMatrix);
 
     -- The number of matrix multiplications needed to perform the brute force algorithm.
     R := ring(C);
@@ -826,8 +826,8 @@ cartesianCode(Ring,List,Matrix) := EvaluationCode => opts -> (F,S,M) -> (
     cartesianCode(F,S,T)
     )
 
-reedMullercode = method(TypicalValue => EvaluationCode)
-reedMullercode(ZZ,ZZ,ZZ) := EvaluationCode => (q,m,d) -> (
+reedMullerCode = method(TypicalValue => EvaluationCode)
+reedMullerCode(ZZ,ZZ,ZZ) := EvaluationCode => (q,m,d) -> (
     -- Contructor for a Reed-Muller code.
     -- Inputs: A prime power q (the order of the finite field), m the number of variables in the defining ring  and an integer d (the degree of the code).
     -- outputs: The cartesian code of the GRM code.
@@ -837,8 +837,8 @@ reedMullercode(ZZ,ZZ,ZZ) := EvaluationCode => (q,m,d) -> (
     cartesianCode(F,S,d)
     )
 
-reedSolomoncode = method(TypicalValue => EvaluationCode)
-reedSolomoncode(Ring,List,ZZ) := EvaluationCode => (F,S,d) -> (
+reedSolomonCode = method(TypicalValue => EvaluationCode)
+reedSolomonCode(Ring,List,ZZ) := EvaluationCode => (F,S,d) -> (
     -- Contructor for a Reed-Solomon code.
     -- Inputs: Field, subset of the field and an integer d (polynomials of degree less than d will be evaluated).
     cartesianCode(F,{S},d-1)
@@ -1297,7 +1297,7 @@ messages(LinearCode) := List => C -> (
 codewords = method(TypicalValue => List)
 codewords(LinearCode) := List => C -> (
     -- save generator matrix as G.
-    G := reduceMatrix(C.GeneratorMatrix);
+    G := reducedMatrix(C.GeneratorMatrix);
     
     -- convert message vectors as lists into matrices.
     M := apply(messages C, m-> matrix({m}));
@@ -2185,13 +2185,13 @@ assert ( length C==5)
 ///
 
 TEST ///
--- reduceMatrix.
+-- reducedMatrix.
 F = GF(4)
 n = 7
 k = 3
 L = apply(toList(1..k),j-> apply(toList(1..n),i-> random(F)))
 m=matrix(L)
-M=reduceMatrix(m)
+M=reducedMatrix(m)
 assert (rank m== rank M)
 ///
 
@@ -2238,19 +2238,19 @@ assert( length C.LinearCode == 9)
 
 TEST ///
 -- Reed-Muller codes.
-C=reedMullercode(3,3,4);
+C=reedMullerCode(3,3,4);
 assert( length C.LinearCode == 27)
 ///
 
 TEST ///
 -- Reed-Solomon codes.
-C=reedSolomoncode(ZZ/11,{1,2,3},3);
+C=reedSolomonCode(ZZ/11,{1,2,3},3);
 assert( length C.LinearCode == 3)
 ///
 
 TEST ///
 -- Reed-Solomon codes.
-C=reedSolomoncode(ZZ/17,{0,1,2,3,7,11},4)
+C=reedSolomonCode(ZZ/17,{0,1,2,3,7,11},4)
 dim C.LinearCode
 assert( dim C.LinearCode == 4)
 ///
@@ -2369,14 +2369,23 @@ doc ///
 		Text
 			{\tt CodingTheory} currently provides constructors for
 			linear codes and evaluation codes, and a few methods for each.
-		Tree
-			:Modified Methods
-			@TO (random,GaloisField,ZZ,ZZ)@
-			@TO (random,QuotientRing,ZZ,ZZ)@
-			@TO (ring,LinearCode)@
+			
 	Contributors
 			Branden Stone generously contributed code or worked on our
 			code at various Macaulay2 workshops.
+	Subnodes
+	 :Main objects
+	 EvaluationCode
+	 LinearCode
+	 :Modified methods
+	 @TO (dim,LinearCode)@
+	 @TO (length,LinearCode)@
+	 @TO (random,GaloisField,ZZ,ZZ)@
+	 @TO (random,QuotientRing,ZZ,ZZ)@
+	 @TO (ring,LinearCode)@
+	 @TO (size,LinearCode)@
+	 @TO (toString,LinearCode)@
+--	 @TO (==,LinearCode,LinearCode)@
 ///
 
 doc ///
@@ -2422,6 +2431,18 @@ doc ///
     Caveat
 	While some functions may work even when a ring is given, instead of a finite field,
 	it is possible that the results are not the expected ones.
+    Subnodes
+	:Related functions and symbols:
+	ambientSpace
+	bitflipDecode
+	Code
+	codewords
+	GeneratorMatrix
+	informationRate
+	linearCode
+	messages
+	minimumWeight
+	syndromeDecode
 ///
 -----------------------------------------------
 -----------------------------------------------
@@ -2463,6 +2484,19 @@ doc ///
 	Description
 		Text
 			We present below the different ways in how a linear code $C$ can be defined.
+	Subnodes
+		:Constructions of linear codes
+		cyclicCode
+		dualCode
+		genericCode
+		hammingCode
+		locallyRecoverableCode
+		ParityCheck
+		repetitionCode
+		shorten
+		universeCode
+		zeroCode
+		zeroSumCode
     	Caveat
 		While some functions may work even when a ring is given, instead of a finite field,
 		it is possible that the results are not the expected ones.
@@ -2798,6 +2832,9 @@ doc ///
          Example
             C = linearCode(GF(8,Variable => b), {{1,1,b,0,0},{0,b,b,1,0},{1,1,1,b,0}});
 	    C.GeneratorMatrix
+    Subnodes
+         :Related function:
+         Generators
 ///
 
 doc ///
@@ -2854,6 +2891,14 @@ doc ///
 	    C = linearCode(F,L,ParityCheck => true);
 	    C.GeneratorMatrix;
 	    C.ParityCheckMatrix
+    Subnodes
+         :Related functions and symbols:
+	 generatorToParityCheck
+         ParityCheckMatrix
+	 ParityCheckRows
+	 parityCheckToGenerator
+	 randLDPC
+	 tannerGraph
 ///
 
 doc ///
@@ -2878,7 +2923,7 @@ doc ///
     SeeAlso
     	ParityCheckRows
 	Generators
-	reduceMatrix
+	reducedMatrix
 	generatorToParityCheck
 	parityCheckToGenerator
 ///
@@ -2906,7 +2951,7 @@ doc ///
     SeeAlso
     	ParityCheckMatrix
 	Generators
-	reduceMatrix
+	reducedMatrix
 	generatorToParityCheck
 	parityCheckToGenerator
 ///
@@ -3094,12 +3139,12 @@ doc ///
 
 doc ///
 	Key
-		reduceMatrix
-		(reduceMatrix, Matrix)
+		reducedMatrix
+		(reducedMatrix, Matrix)
 	Headline
 		reduced matrix
 	Usage
-		reduceMatrix(Matrix)
+		reducedMatrix(Matrix)
 	Inputs
 		M:Matrix
 	Outputs
@@ -3114,7 +3159,7 @@ doc ///
 			k = 3;
 			L = apply(toList(1..k),j-> apply(toList(1..n),i-> random(F)));
 			m=matrix(L)
-			reduceMatrix(m)
+			reducedMatrix(m)
 ///
 
 doc ///
@@ -3291,7 +3336,7 @@ doc ///
 
 doc ///
 	Key
-		(random, GaloisField, ZZ, ZZ)
+		(random,GaloisField,ZZ,ZZ)
 	Headline
 		constructs a random linear code over a finite field
 	Usage
@@ -3302,19 +3347,41 @@ doc ///
 		k:ZZ
 	Outputs
 		:LinearCode
-			$C$
 	Description
 		Text
 		    Given a finite field {\tt F} and positive integers {\tt n} and {\tt k},
-		    returns a random linear code $C$ over {\tt F} of length $n$ and dimension at most $k$.
+		    returns a random linear code over {\tt F} of length $n$ and dimension at most $k$.
 		Example
 			F = GF(2, 4)
-			C = random ( F , 5, 3 )
+			C = random(F,5,3)
 ///
+-*doc ///
+        Key
+               (dim,LinearCode)
+        Headline
+                dimension of a linear code
+        Usage
+                dim(C)
+        Inputs
+                C:LinearCode
+        Outputs
+                :Number
+        Description
+                Text
+                        Given a linear code {\tt C}, returns the dimension of    
+                        {\tt C}. The dimension of {\tt C} is defined as the 
+                        dimension of {\tt C} as a vector space.
+		Example
+	                       C = linearCode(GF(2),{{1,1,0,0},{0,0,1,1}});
+	                       dim C
+	                       H = hammingCode(2,3)
+	                       dim H
+///
+*-
 
 doc ///
 	Key
-		(random, QuotientRing, ZZ, ZZ)
+		(random,QuotientRing,ZZ,ZZ)
 	Headline
 		constructs a random linear code over a quotient ring
 	Usage
@@ -3332,7 +3399,7 @@ doc ///
 		    returns a random linear code $C$ over {\tt QR} of length $n$ and dimension at most $k$.
 		Example
 			QR = ZZ/3
-			C = random ( QR , 5, 3 )
+			C = random(QR,5,3)
 ///
 
 
@@ -3342,7 +3409,7 @@ doc ///
    Headline
        the ring of a code
    Usage
-       ring(LinearCode)
+       ring LinearCode
    Inputs
         C:LinearCode
    Outputs
@@ -3362,11 +3429,11 @@ doc ///
         Headline
                 string with the vectors of a generator matrix of a code
         Usage
-                toString(C)
+                toString C
         Inputs
                 C:LinearCode
         Outputs
-                S:String    
+                :String    
         Description
                 Text
                         Given a linear code {\tt C}, this function returns a string that 
@@ -3386,15 +3453,12 @@ doc ///
        LinearCode == LinearCode
    Inputs
         C1:LinearCode
-	    a linear code.
 	C2:LinearCode
-	    a linear code.
    Outputs
        :Boolean
-           whether two codes define the same subspace.
    Description
        Text  
-       	   Given linear codes C1 and C2, this code determines if they
+       	   Given linear codes {\tt C1} and {\tt C2}, this function determines if they
 	   define the same subspace over the same field or ring.
        Example
            F = GF(3,4)
@@ -3403,7 +3467,6 @@ doc ///
            C1 = linearCode(F,L)
 	   C2 = linearCode(matrix L)
 	   C1 == C2
-       
 ///
 
 
@@ -3427,6 +3490,9 @@ doc ///
 	    the minimum of the weights of all the codewords in {\tt C}.
 	Example
 	    minimumWeight(hammingCode(2,3))
+    Subnodes
+	:Related function:
+	weight
     Caveat
     	To the best of our knowledge, the algorithm is implemented well. Unfortunately sometimes it is slow.
 	It may be because it depends on the Matroid package or an error in the implementation.
@@ -3789,6 +3855,13 @@ doc ///
 			F=GF(4,Variable=>a);
                         C=linearCode(matrix{{1,a,0},{0,1,a}});
                         ambientSpace C
+	Subnodes
+	 :Related functions and symbols:
+	 alphabet
+	 AmbientModule
+	 BaseField
+	 field
+	 vectorSpace
 ///
 
 doc ///
@@ -3962,7 +4035,7 @@ doc ///
         Headline
                 dimension of a linear code
         Usage
-                dim(C)
+                dim C
         Inputs
                 C:LinearCode
         Outputs
@@ -4004,7 +4077,7 @@ doc ///
     	Text
 	    The next is an example for the class of @TO EvaluationCode@.
 	Example
-	    RM=reedMullercode(2,3,1);
+	    RM=reedMullerCode(2,3,1);
 	    informationRate(RM.LinearCode)
 ///
 
@@ -4039,7 +4112,7 @@ doc ///
                         The next example illustrates how to use this function for the class of
 			Evaluation Codes.
 		Example
-	                       RM = reedMullercode(2,3,1);
+	                       RM = reedMullerCode(2,3,1);
 	                       size RM.LinearCode
 ///
 
@@ -4071,7 +4144,7 @@ doc ///
                         The next example illustrates how to use this function for the class of
 			Evaluation Codes.
 		Example
-	                       RM = reedMullercode(2,3,1);
+	                       RM = reedMullerCode(2,3,1);
 	                       length RM.LinearCode
 ///
 
@@ -4098,7 +4171,7 @@ doc ///
     	Text
 	    The next is an example for the class of @TO EvaluationCode@.
        	Example
-	    RM = reedMullercode(2,4,1);
+	    RM = reedMullerCode(2,4,1);
 	    vectorSpace(RM.LinearCode)
 ///
 
@@ -4126,7 +4199,7 @@ doc ///
     	Example
 	    messages hammingCode(2,3)
 	Example
-	    RM=reedMullercode(2,2,1);
+	    RM=reedMullerCode(2,2,1);
 	    messages(RM.LinearCode)
     	Text
             This method is provided by the package @TO CodingTheory@.
@@ -4159,6 +4232,10 @@ doc ///
                          A linear code is called cyclic if $(a_{n},a_1,\ldots,a_{n-1})\in C$ for
 			 all $(a_1,a_2,\ldots,a_n)\in C$.
                          A cyclic code can be defined by a polynomial.
+	Subnodes
+                   :Related functions:
+		   cyclicMatrix
+		   quasiCyclicCode
         Synopsis
              Heading
                   a polynomial is given
@@ -4312,6 +4389,17 @@ doc ///
 	  C.LinearCode
 	  length C.LinearCode
 	  dim C.LinearCode
+	Subnodes
+	 :Functions related to ideals and evaluation codes
+	  evaluationCode
+	  footPrint
+	  genMinDisIdeal
+	  hyp
+	  vasconcelosDegree
+	  vNumber
+	 :Symbols that are used as a key for storing information of an evaluation code
+	  PolynomialSet
+	  VanishingIdeal
 ///
 
 doc ///
@@ -4348,6 +4436,9 @@ doc ///
 		R=(ZZ/13)[x]
 		g=x^3
 		locallyRecoverableCode({13,9,4,2},A,g)
+	Subnodes
+	 :Related function:
+	 getLRCencodingPolynomial
 ///
 
 doc ///
@@ -4356,7 +4447,7 @@ doc ///
 		(evaluationCode, Ring, List, List)
 		(evaluationCode, Ring, List, Matrix)
 	Headline
-		an evaluation code construction
+		functions to construct evaluation codes over Galois fields
 	Usage
 		evaluationCode(F,P,S)
 		evaluationCode(F,P,M)
@@ -4372,6 +4463,14 @@ doc ///
 		Text
 			We present below the different ways in how an evaluation
 			code $C$ can be defined.
+	Subnodes
+	 :Constructions of evaluation codes
+	  evCodeGraph
+	  cartesianCode
+	  orderCode
+	  reedSolomonCode
+	  reedMullerCode
+	  toricCode
 	Caveat
 		While this function may work even when a ring is given,
 		instead of a finite field, it is possible that the results
@@ -4466,6 +4565,9 @@ doc ///
 	                   T.LinearCode
 	                   length T.LinearCode
 	                   dim T.LinearCode
+	Subnodes
+	 :Symbols that are used as a key for storing information of a toric code
+	  ExponentsMatrix
 ///
 
 doc ///
@@ -4497,6 +4599,9 @@ doc ///
 		While this function may work even when a ring is given,
 		instead of a finite field, it is possible that the results
 		are not the expected ones.
+	Subnodes
+	 :Symbols that are used as a key for storing information of a Cartesian code
+	  Sets
     Synopsis
 	Heading
 		a ring, a list and an integer are given
@@ -4574,12 +4679,12 @@ doc ///
 
 doc ///
 	Key
-		reedMullercode
-		(reedMullercode,ZZ,ZZ,ZZ)
+		reedMullerCode
+		(reedMullerCode,ZZ,ZZ,ZZ)
 	Headline
 	        constructs the Reed-Muller code  
 	Usage
-		reedMullercode(q,m,d)
+		reedMullerCode(q,m,d)
 	Inputs
 		q:ZZ
                 m:ZZ
@@ -4593,7 +4698,7 @@ doc ///
 			of total degree at most {\tt d} are evaluated on the points
 			of {\tt GF(q)}$^\mathtt{m}$.
 		Example
-			 C=reedMullercode(2,3,4);
+			 C=reedMullerCode(2,3,4);
 	                 C.Sets;
 	                 C.VanishingIdeal;
 	                 C.PolynomialSet;
@@ -4603,12 +4708,12 @@ doc ///
 
 doc ///
 	Key
-		reedSolomoncode
-		(reedSolomoncode,Ring,List,ZZ)
+		reedSolomonCode
+		(reedSolomonCode,Ring,List,ZZ)
 	Headline
 	         constructs the Reed-Solomon code  
 	Usage
-		reedSolomoncode(F,L,k)
+		reedSolomonCode(F,L,k)
 	Inputs
 		F:Ring
                 L:List
@@ -4622,7 +4727,7 @@ doc ///
 			code obtained when polynomials of degree less than {\tt k}
 			are evaluated on the elements of {\tt L}.
 		Example
-			 C=reedSolomoncode(ZZ/31,{1,2,3},3);
+			 C=reedSolomonCode(ZZ/31,{1,2,3},3);
 	                 peek C
 ///
 
@@ -4912,9 +5017,11 @@ restart
 uninstallPackage "CodingTheory"
 installPackage "CodingTheory"
 installPackage("CodingTheory", RemakeAllDocumentation=>true)
+installPackage("CodingTheory", RemakeAllDocumentation=>true, RunExamples=>false)
 installPackage("CodingTheory", MakeDocumentation=>true,FileName=>"~/myCodingTheoryStuff/CodingTheoryEdit5202020.m2")
 check CodingTheory
 viewHelp CodingTheory
+viewHelp doc
 
 -----------------------------------------------------
 -- Codes from Generator Matrices (as lists):
