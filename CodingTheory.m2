@@ -86,6 +86,7 @@ export {
     "quasiCyclicCode",
     "hammingCode",
     "cyclicCode",
+    "randomCode",    
     
     -- LRC codes
     "locallyRecoverableCode",
@@ -1366,12 +1367,13 @@ shorten ( LinearCode, ZZ ) := LinearCode => ( C, i ) -> (
 --    linearCode( M, apply(toList(1..n),j-> apply(toList(1..k),i-> random(M))) )
 --    )
 
-random (GaloisField, ZZ, ZZ) := LinearCode => opts -> (F, n, k) -> (
-    linearCode(F, n, apply(toList(1..k), j-> apply(toList(1..n),i-> random(F, opts))))
-    )
 
-random (QuotientRing, ZZ, ZZ) := LinearCode => opts -> (R, n, k) -> (
-    linearCode(matrix apply(toList(1..k), j-> apply(toList(1..n),i-> random(R, opts))))
+randomCode = method(TypicalValue => LinearCode);
+randomCode (GaloisField,ZZ,ZZ) := (LinearCode) => (F, n, k) -> (
+    linearCode(F, n, apply(toList(1..k), j-> apply(toList(1..n),i-> random(F))))
+    )
+randomCode (QuotientRing,ZZ,ZZ) := (LinearCode) => (R, n, k) -> (
+    linearCode(matrix apply(toList(1..k), j-> apply(toList(1..n),i-> random(R))))
     )
 
     
@@ -1998,14 +2000,14 @@ TEST ///
 F = GF(2, 4)
 n = 5
 k = 3
-C = random ( F , n, k )
+C = randomCode (F,n,k)
 
 assert( length C == 5 )
 
-F = GF 2
+QR = ZZ/3
 n = 5
 k = 3
-C = random ( F , n, k )
+C = randomCode (QR,n,k)
 
 assert( length C == n)
 ///
@@ -2380,12 +2382,14 @@ doc ///
 	 :Modified methods
 	 @TO (dim,LinearCode)@
 	 @TO (length,LinearCode)@
-	 @TO (random,GaloisField,ZZ,ZZ)@
-	 @TO (random,QuotientRing,ZZ,ZZ)@
 	 @TO (ring,LinearCode)@
 	 @TO (size,LinearCode)@
 	 @TO (toString,LinearCode)@
---	 @TO (==,LinearCode,LinearCode)@
+	 :Implemented functions that are independ of coding theory
+	 enumerateVectors
+	 randNoRepeats
+	 reducedMatrix
+	 shortestPath
 ///
 
 doc ///
@@ -2443,6 +2447,7 @@ doc ///
 	messages
 	minimumWeight
 	syndromeDecode
+	@TO (symbol ==,LinearCode,LinearCode)@
 ///
 -----------------------------------------------
 -----------------------------------------------
@@ -2492,6 +2497,7 @@ doc ///
 		hammingCode
 		locallyRecoverableCode
 		ParityCheck
+		randomCode
 		repetitionCode
 		shorten
 		universeCode
@@ -3336,49 +3342,34 @@ doc ///
 
 doc ///
 	Key
-		(random,GaloisField,ZZ,ZZ)
+		randomCode
+		(randomCode,GaloisField,ZZ,ZZ)
+		(randomCode,QuotientRing,ZZ,ZZ)
 	Headline
 		constructs a random linear code over a finite field
 	Usage
-		random(F,n,k)
+		randomCode(F,n,k)
+		randomCode(QR,n,k)
 	Inputs
 		F:GaloisField
+		QR:QuotientRing
 		n:ZZ
 		k:ZZ
 	Outputs
 		:LinearCode
 	Description
 		Text
-		    Given a finite field {\tt F} and positive integers {\tt n} and {\tt k},
-		    returns a random linear code over {\tt F} of length $n$ and dimension at most $k$.
+		    Given a finite field {\tt F} (or a quotient ring {\tt QR}) and two positive
+		    integers {\tt n} and {\tt k}, returns a random linear code over {\tt F} (or
+		    {\tt QR}) of length $n$ and dimension at most $k$.
 		Example
 			F = GF(2, 4)
-			C = random(F,5,3)
+			C = randomCode(F,5,3)
+			QR = ZZ/3
+			C = randomCode(QR,5,3)
 ///
--*doc ///
-        Key
-               (dim,LinearCode)
-        Headline
-                dimension of a linear code
-        Usage
-                dim(C)
-        Inputs
-                C:LinearCode
-        Outputs
-                :Number
-        Description
-                Text
-                        Given a linear code {\tt C}, returns the dimension of    
-                        {\tt C}. The dimension of {\tt C} is defined as the 
-                        dimension of {\tt C} as a vector space.
-		Example
-	                       C = linearCode(GF(2),{{1,1,0,0},{0,0,1,1}});
-	                       dim C
-	                       H = hammingCode(2,3)
-	                       dim H
-///
-*-
 
+-*
 doc ///
 	Key
 		(random,QuotientRing,ZZ,ZZ)
@@ -3401,6 +3392,7 @@ doc ///
 			QR = ZZ/3
 			C = random(QR,5,3)
 ///
+*-
 
 
 doc ///
@@ -4573,15 +4565,15 @@ doc ///
 doc ///
 	Key
 	        cartesianCode
-		(cartesianCode, Ring, List, List)
-		(cartesianCode, Ring, List, ZZ)
-                (cartesianCode, Ring, List, Matrix)
+		(cartesianCode,Ring,List,List)
+		(cartesianCode,Ring,List,ZZ)
+                (cartesianCode,Ring,List,Matrix)
 	Headline
 		Cartesian code
 	Usage
-		cartesianCode(F, L, d)
-		cartesianCode(F, L, S)
-		cartesianCode(F, L, M)
+		cartesianCode(F,L,d)
+		cartesianCode(F,L,S)
+		cartesianCode(F,L,M)
 	Inputs
 		F:Ring
 		L:List
