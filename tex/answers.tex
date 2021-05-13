@@ -1,0 +1,108 @@
+\documentclass[12pt]{amsart}
+\frenchspacing \mathsurround=1pt \emergencystretch=5pt
+\tolerance=400
+
+\topmargin = -0.1in \evensidemargin = 0.2in \oddsidemargin = 0.2in
+\textheight = 23cm \headheight = 10pt
+\textwidth = 15.7cm
+
+\usepackage{amsmath, amsthm, latexsym, amssymb, amsfonts, epsfig, epsf, xcolor, hyperref}
+\usepackage{mathtools}
+\usepackage{bm,xcolor,tikz,hyperref}
+%\usepackage{refcheck}
+\usepackage{bm}
+\usepackage{blkarray}
+\usepackage{booktabs}
+\usepackage{enumitem}
+
+
+\newenvironment{pf}{\proof[\proofname]}{\endproof}
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{remark}[theorem]{Remark}
+
+\newcommand{\rmv}[1]{}
+
+
+\begin{document}
+\begin{center}
+Response to reviews
+\end{center}
+We would like to thank you for your careful reading the manuscript and providing insightful comments. They have served to improve the submission. The first main change is the documentation in the package. We extended/improved/homogenized/latex-it all the documentation. The second main change is the minimum distance function, we found a flaw that \textcolor{red}{Nathan, write something please}. Here is a list of answers to the reviewer's comments that we performed during the preparation of this revision.
+\begin{center}
+{\bf report\_M\_on\_v1}
+\end{center}
+\begin{itemize}
+\item[\rm 1.] Example 4.1 now contains the output of the command {\tt C.VanishingIdeal}.
+\item[\rm 2.] \textcolor{red}{Nathan, please write something about the minimum weight}
+\item[\rm 3.] We were not aware of this convention, thank you for pointing it out. We changed the name of the functions.
+\item[\rm 7.] The documentation of the function {\tt LocallyRecoverableCode} has been corrected and now has more information.
+\item[\rm 9.] In the documentation for shorten, the word shorten in the title has not been capitalized because according to the literature of {\it Macaulay2}, the titles start with a lower letter. Actually, we were not aware of this and now all the titles start with a lower letter.
+\item[\rm 10.] The documentation for {\tt tannerGraph} has been extended.
+\end{itemize}
+We also corrected the typos that are mentioned in items 4, 5, 6, 8, 11.
+\begin{center}
+{\bf report\_C\_on\_v1} (Code)
+\end{center}
+\begin{itemize}
+\item The package now works with {\it Macaulay2} 1.17.
+\item About public domain \textcolor{red}{Gwin, help please}
+\item We have updated {\tt PackageImports} and {\tt PackageExports}.
+\item About return and semicolon \textcolor{red}{Gwin, help please}
+\item We corrected the word Module in the expression ``Expected codewords all to be the same length and equal to the rank of the Module".
+\item Now all the functions have their bodies indented.
+\end{itemize}
+\begin{center}
+{\bf report\_C\_on\_v1} (Paper)
+\end{center}
+\begin{itemize}
+\item The word {\it Macaulay2} is always in italic and never abbreviated as M2.
+\item We replaced the word ``define'' with ``implement'' where the meaning of the context implies that a function or object has been implemented in this package. For example, In line 1 in the Abstract the phrase ``we define an object called {\it linear code}'' was substituted by ``we implement an object called {\tt LinearCode}.
+\item We replaced ``different'' with ``various'' in line 1 in the last paragraph in page 1.
+\item We fixed the grammar in ``There are many construction of evaluation codes'' to ``There are many constructions of evaluation codes''.
+\item All computer code is in {\tt typewriter} font.
+\item We corrected the mixture of computer code and mathematics.
+\end{itemize}
+\begin{center}
+{\bf report\_C\_on\_v1} (Documentation)
+\end{center}
+\begin{itemize}
+\item There are no more warnings about missing documentation. \textcolor{red}{Nathan, there is a missing documentation now about the weight function}
+\item We corrected all the typos that you found. And more! We really want to thank you for all the comments, they were the basis to redo the documentation.
+\item The headline now is ``tools for Coding Theory".
+\item We are using LaTex for all the documentation.
+\item HashTable has been changed to hash table. Similar issues have been corrected.
+\item We changed ``m-variate polynomials over F'' by ``polynomials over F in m variables''.
+\item We corrected the following. This sounds circular:	field -- Returns the field where the entries of the field belong.
+Now we have: field -- the field of a code
+\item Now we have in the description of ``field" the following: Given a code {\tt C}, returns the field (or ring) that contains the entries of the generator matrix of {\tt C}.
+\item We added more information in the description of the following functions: generalized footprint, footprint, v-number, Vasconcelos and hyp. In addition, we added hyperlinks to the papers where they were defined.
+\item We have now linearly independent instead of l.i.
+\item We are using now: this symbol is used as a key for storing.
+\item We removed capitalization where it is a grammatical error.
+\item After every i.e. there is a comma.
+\item We are using vector spaces instead of finitely generated modules. There is only once where we still use finitely generated modules. This is because we want to store the information of the module (inside {\it Macaulay2}) that is used to construct the code.
+\item We are using {\tt typewriter} font in the documentation where appropriated.
+\item We updated the description of {\tt messages}.
+\item We replaced the sentence ``For the best of our knowledge" for ``To the best of our knowledge".
+\item We replaced the sentence ``the algorithm is well-implemented ``for "the algorithm is implemented well".
+\item We replaced the sentence ``an error on the implementation" for ``an error in the implementation".
+\item We replaced the sentence ``If generator or parity check matrix is not full rank" for ``If the generator matrix or the parity check matrix is not of full rank".
+\item We replaced the sentence ``compute the equivalent reduce matrix" for ``Returns the reduced matrix".
+\item We have put periods at ends of sentence of the code, we have also removed periods from the documentation headlines.
+\item Fixed the punctuations and spacing.
+\item We changed {\tt reduceMatrix} by {\tt reducedMatrix}.
+\item We fixed ``repetition'' code.
+\item We changed the names {\tt RMCode}, {\tt RSCode}, {\tt vasFunction}, {\tt hYpFunction} and {\tt gMdFunction} by {\tt reedMullerCode}, {\tt reedSolomonCode}, {\tt vasconcelosDegree }, {\tt hYp} and {\tt genMinDisIdeal}, respectively.
+\end{itemize}
+
+
+
+We hope that you find this revision acceptable. 
+
+\end{document}
