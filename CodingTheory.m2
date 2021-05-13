@@ -54,10 +54,7 @@ export {
     "ParityCheckRows",
     "ParityCheckMatrix",
     "Code",
-    
-    "permuteToStandardForm",
-    "chooseStrat",
-    
+    "chooseStrat",    
     -- Evaluation Code
     -- Types and Constructors
     "EvaluationCode",
@@ -661,7 +658,8 @@ stdForm = M -> (
 -- Estimate the best strategy for a given linear code.
 -- The reason this is a seperate function is because it is sometimes desirable to know what 
 -- strategy minimumDistance chooses. For example, during debugging, development and testing.
-chooseStrat = C -> (
+chooseStrat = method(TypicalValue => String)
+chooseStrat LinearCode := C -> (
     M := matrix C.Generators;
     k := rank reducedMatrix(C.GeneratorMatrix);
 
@@ -3524,6 +3522,70 @@ doc ///
 ///
 
 
+doc ///
+    Key
+	[minimumWeight, Strategy]
+    Headline
+    	Specify the algorithm used to perform a minimum weight computation.
+    Usage
+    	minimumWeight(C, Strategy=>StratName)
+    Inputs
+    	C:LinearCode
+	StratName:String
+	    The name of the desired algorithm to use.
+    Description
+        Text
+	    By default, the function @TO "minimumWeight"@ uses the function @TO "chooseStrat"@ to estimate the optimal strategy for a 
+	    given linear code. Specifying a linear code manually is not recommended unless you suspect that the automatically chosen
+	    strategy is not the optimal one.    
+	
+            The valid options of the argument @TT "StratName"@ are:
+	    
+	    @UL {
+	    	{BOLD {"MatroidPartition"}, ": The most advanced algorithm, but requires a longer up-front computation."},
+	    	{BOLD {"OneInfoSet"},  ": An algortihm that is always faster than ", TT {"BruteForce"},"."},
+		{BOLD {"BruteForce"}, ": (Not recommended) Determine the minimum weight by enumerating all codewords."}
+	   	}@
+	    	    
+	    @TT "MatroidPartition"@ is the most advanced strategy, but requires a longer up-front computation. Specifically, it has to 
+	    compute the matroid associated with the given linear code's generator matrix and then compute a partition of it into independent
+	    sets. If such a partition exists, this algorithm will be strictly faster than @TT "OneInfoSet"@ after the matroid partition
+	    has been computed.
+	    
+	    @TT "OneInfoSet"@ can be viewed as a direct improvement over the @TT "BruteForce"@ strategy. The properties of this algorithm
+	    imply that it is always as fast or faster than @TT "BruteForce"@. 
+	       
+	    @TT "BruteForce"@ is the simplest and most reliable strategy, but also almost always the slowest. It is intended mainly for
+	    internal purposes such as debbugging and testing the other strategies. 
+    SeeAlso
+        chooseStrat
+	       
+
+///
+
+doc ///
+    Key
+    	chooseStrat
+	(chooseStrat,LinearCode)
+    Headline
+    	Estimate the optimal strategy to compute the minimum weight of a linear code. 
+    Usage
+    	chooseStrat C
+    Inputs
+    	C: LinearCode
+    Outputs
+    	:String
+    Description
+    	Text
+       	    This function returns the name of the strategy that would be automatically chosen by function @TO "minimumWeight"@ if no
+	    value of the optional argument @TT "Strategy"@ is specified. 
+	Example
+	    chooseStrat(hammingCode(2,3))
+	    F = GF(16);
+	    chooseStrat(linearCode random(F^5, F^10))
+    SeeAlso
+    	[minimumWeight, Strategy]
+///
 
 doc ///
     Key

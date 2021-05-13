@@ -6,9 +6,11 @@ pathToPackage = "./CodingTheory.m2"
 installPackage(
     "CodingTheory",
     FileName=>pathToPackage,
-    RunExamples => false,
-    RerunExamples => false
+    RunExamples => true,
+    RerunExamples => true
     )
+
+error "stop"
 
 testCorrectness = genMat -> (    
     -- It is important to make multiple instances of the same code for this
