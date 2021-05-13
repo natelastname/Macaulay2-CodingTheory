@@ -61,6 +61,9 @@ export {
     "ParityCheckMatrix",
     "Code",
     
+    "permuteToStandardForm",
+    "chooseStrat",
+    
     -- Evaluation Code
     -- Types and Constructors
     "EvaluationCode",
@@ -557,6 +560,36 @@ minDistBrute LinearCode := Number => C -> (
     minWeightC
     )
 
+minDistOneInfoSet = method(TypicalValue => Number)
+minDistOneInfoSet LinearCode := ZZ => C -> (
+    genMat := stdForm C.GeneratorMatrix;
+    k := rank genMat;
+    n := numcols genMat;
+    
+    dlb := 1;
+    dub := n - k + 1;
+    w := 1;
+    
+    while w <= k and dlb < dub do(
+	--print("-----------------------------------------------");
+	--print("Current weight: "|toString(w)|" / "|toString(k));
+	--print("Current lower bound:"|toString(dlb));
+	--print("Current upper bound:"|toString(dub));
+	
+	-- Set msgsK to a list of all weight k messages.
+	msgsK := apply(subsets(k,w), x -> subsetToList(k,x));
+	msgsK = flatten apply(msgsK, x -> enumerateVectors(ring(C), x));
+	-- Encode the messages in msgsK.
+	codewordsK := apply(msgsK, u -> flatten entries ((matrix({toList u}))*genMat));
+	-- Update the lower/upper bounds.
+	dub = min(append(apply(codewordsK, i->weight i),dub));
+	dlb = w + 1;
+	w = w + 1;
+	);
+    C.cache#"minWeight" = dub;
+    dub
+    )
+
 -- Calculate minimum distance using the matroid partition algorithm.
 minDistMatroidPart = method(TypicalValue => Number)
 minDistMatroidPart LinearCode := ZZ => C -> (
@@ -572,6 +605,12 @@ minDistMatroidPart LinearCode := ZZ => C -> (
     cMatroid := matroid(M);
     cMatroids := apply(toList(1..l),i->cMatroid);
     T := matroidPartition(cMatroids);
+    
+    if T == {} then(
+	-- No matroid parition exists. 
+	-- Not sure if there is a better option in this case.
+       	return minDistOneInfoSet C;
+	);
     r := {}; --list of relative ranks
     currentUnion := set();
     for i from 0 to length T-1 do (
@@ -582,6 +621,11 @@ minDistMatroidPart LinearCode := ZZ => C -> (
     dupper := n-k+1; --Start with Singleton Bound
     dlower := 0;
     while(true) do (
+	--print("-----------------------------------------------");
+	--print("Current weight: "|toString(w)|" / "|toString(k));
+	--print("Current information set: "|toString(j)|" / "|toString(D));
+        --print("Current lower bound:"|toString(dlower));
+        --print("Current upper bound:"|toString(dupper));
         permutation := join(T_(j-1),toList(0..n-1)-set(T_(j-1)));
 	G := reduceMatrix(M_permutation);
     	
@@ -590,46 +634,49 @@ minDistMatroidPart LinearCode := ZZ => C -> (
 	specialCodewords := apply(sameWeightWords, u -> flatten entries ((matrix({toList u}))*G));
     	
         dupper = min(append(apply(specialCodewords, i->weight i),dupper));
-        dlower = sum(toList apply(1..j,i->max(0,w+1-k+r_(i-1))))+sum(toList apply(j+1..D,i->max(0,w-k+r_(i-1))));
+        dlower =          sum(toList apply(1..j,i->max(0,w-k+r_(i-1))));
+	dlower = dlower + sum(toList apply(j+1..D,i->max(0,w-k+r_(i-1))));
 	
 	if dlower >= dupper then (
 	    C.cache#"minWeight" = dupper;
+	    --print("-----------------------------------------------");
+    	    --error "stop";
 	    return dupper;
-    	    ) else (
-	    if j < D then j = j+1 else w = w+1
+    	    );
+	
+	if j < D then (
+	    j = j + 1;
+	    ) else(
+	    w = w + 1;
 	    );
-    	if w > k then error "No minimum weight found.";
+	-- This error is a failsafe to prevent an infinite loop.   
+    	if w > k then error "No minimum weight found. (This is a bug, try using a different strategy.)";
     	)
     )
 
-minimumWeight = method(TypicalValue => ZZ, Options => {Strategy=>""})
-minimumWeight LinearCode := ZZ => opts -> C -> (
-    
-    if C.cache#?("minWeight") then(
-	return C.cache#"minWeight";
-	);
-    if opts.Strategy == "MatroidPartition" then (
-    	return minDistMatroidPart C;
-	);
-    if opts.Strategy == "BruteForce" then(
-	return minDistBrute C;
-	);
-    if opts.Strategy != "" then(
-	error "Strategy '"|toString(opts.Strategy)|"' not recognized.";
-	);
-    
-    -- If no strategy specified, try to guess which one to use.
+-- Unlike the function reduceMatrix, this function may change the actual vector 
+-- space that defines the linear code. However, the minimum distance is preserved.
+stdForm = M -> (
+    M = reduceMatrix M;
+    -- remove the columns equal to zero
+    M = submatrix'(M, toList select(0..(numcols M)-1, x -> M_x == M_x - M_x));
+    first permuteToStandardForm M
+    );
+
+-- Estimate the best strategy for a given linear code.
+-- The reason this is a seperate function is because it is sometimes desirable to know what 
+-- strategy minimumDistance chooses. For example, during debugging, development and testing.
+chooseStrat = C -> (
     M := matrix C.Generators;
-    k := rank reduceMatrix(C.GeneratorMatrix);
+    k := rank reduceMatrix C.GeneratorMatrix;
 
     -- The number of matrix multiplications needed to perform the brute force algorithm.
-    R := ring(C);
+    R := ring C;
     numCodewords := (R.order)^k;
-    	
     -- The number of  (k x k) matrices it will need to compute the rank of.
     -- This computation takes place in the matroid constructor, matroid(Matrix). 
     numMatrices := binomial(numcols M, k);
-	
+    
     -- This estimation is such that the only way that it can choose to use the
     -- brute force algorithm when it should have used the matroid partition 
     -- algorithm is if the code in the Matroids package changes. (This assumes that
@@ -637,10 +684,35 @@ minimumWeight LinearCode := ZZ => opts -> C -> (
     -- same amount of time. Also, it assumes that this function actually does call "matroid" 
     -- on the generator matrix of C).
     if numMatrices > numCodewords then(
-	minDistBrute C
+	-- The "OneInfoSet" strategy is a direct improvement over "BruteForce."
+	"OneInfoSet"
 	)else(
-	minDistMatroidPart C
+	"MatroidPartition"
 	)   
+    );
+
+minimumWeight = method(TypicalValue => ZZ, Options => {Strategy=>""})
+minimumWeight LinearCode := ZZ => opts -> C -> (
+    
+    if C.cache#?("minWeight") then(
+	return C.cache#"minWeight";
+	); 
+    
+    if opts.Strategy == "MatroidPartition" then (
+    	return minDistMatroidPart C;
+	);
+    if opts.Strategy == "BruteForce" then(
+	return minDistBrute C;
+	);
+    if opts.Strategy == "OneInfoSet" then(
+	return minDistOneInfoSet C;
+	);
+    if opts.Strategy != "" then(
+	error "Strategy '"|toString(opts.Strategy)|"' not recognized.";
+	);
+    
+    -- If no strategy specified, try to guess which one to use.
+    minimumWeight(C, Strategy=>(chooseStrat C) )
     )
 
 
