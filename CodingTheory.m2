@@ -2,7 +2,7 @@
 newPackage(
 	"CodingTheory",
     	Version => "1.0", 
-    	Date => "May 10, 2020",
+    	Date => "May 13, 2020",
     	Authors => {
 	     {Name => "Taylor Ball", Email => "trball13@gmail.com"},
 	     {Name => "Eduardo Camps", Email => "camps@esfm.ipn.mx"},
@@ -23,19 +23,13 @@ newPackage(
 	PackageImports => {
 	    "SRdeformations",
 	    "Polyhedra",
-	    "Graphs",
 	    "NAGtypes",
 	    "RationalPoints", 
 	    "Matroids",
 	    "PrimaryDecomposition"
 	    },
         PackageExports => {
-	    "SRdeformations",
-	    "Polyhedra",
-	    "Graphs",
-	    "NAGtypes",
-	    "RationalPoints",
-	    "Matroids"
+	    "Graphs"
 	    }
 	)
 
@@ -1014,9 +1008,7 @@ cyclicMatrix(GaloisField,List) := Matrix => (F,v) -> (
     )
 
 quasiCyclicCode = method(TypicalValue => LinearCode)
-
 quasiCyclicCode(GaloisField,List) := LinearCode => (F,V) -> (
-        
     -- produce cyclic matrices with each v in V as first row.
     cyclicMatrixList := apply(V, v-> cyclicMatrix(F,v)); 
     
@@ -1514,7 +1506,7 @@ tannerGraph(Matrix) := H -> (
 	)
     );
     Graphs$graph(symsA|symsB, flatten tannerEdges)    
-);
+    );
 
 randNoRepeats = method(TypicalValue => List)
 randNoRepeats (ZZ, ZZ) := (a, k) -> (
@@ -1544,7 +1536,6 @@ randNoRepeats (ZZ, ZZ) := (a, k) -> (
 
 randLDPC = method(TypicalValue => Matrix)
 randLDPC(ZZ, ZZ, RR, ZZ) := (n, k, m, b) -> (
-    
     if(n <= k) then(
 	error "n must be less than k.";
 	);
@@ -1597,7 +1588,6 @@ enumerateVectors(Ring, List) := (R, errorBinary) -> (
 
 syndromeDecode = method(TypicalValue => List)
 syndromeDecode(LinearCode, Matrix, ZZ) := (C, v, minDist) -> (
-    
     R := ring(v);
     if(minDist <= 0) then error "cannot have minimum distance less than 0.";
         
@@ -2399,7 +2389,7 @@ doc ///
     	class of linear codes
     Description
     	Text
-	    A linear code is the image of some mapping between finitely generated vector spaces,
+	    A linear code is the image of some mapping between vector spaces,
 	    where each vector space is taken to be over the same finite field. A codeword is an element
 	    of the image. A linear code in {\it Macaulay2} is implemented as a hash table.
 	    The keys of the hash table correspond to common representations of the code, as well as
@@ -3831,7 +3821,7 @@ doc ///
 		ambientSpace
 		(ambientSpace,LinearCode)
 	Headline
-		recover the ambient module the code is subspace of
+		recovers the ambient module of a code
 	Usage
 		ambientSpace C
 	Inputs
