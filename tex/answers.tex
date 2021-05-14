@@ -33,13 +33,19 @@
 \begin{center}
 Response to reviews
 \end{center}
-We would like to thank you for your careful reading the manuscript and providing insightful comments. They have served to improve the submission. The first main change is the documentation in the package. We extended/improved/homogenized/latex-it all the documentation. The second main change is the minimum distance function, we found a flaw that \textcolor{red}{Nathan, write something please}. Here is a list of answers to the reviewer's comments that we performed during the preparation of this revision.
+We would like to thank you for your careful reading of our manuscript and for your insightful comments which have served to improve our submission. This document contains an overview of the changes that have been made in response to previous comments.
+\\
+
+In this new version, a number of documentation bugs have been fixed. Specifically, various instances of typos, lack of LaTex usage, poor wording and missing information have been addressed. We have also addressed various issues with code quality by refactoring various parts of the code. Additionally, this new iteration of the {\ttfamily CodingTheory} package addresses a number of bugs that were not mentioned by either of the reviewers. 
+\\
+
+Here is a more specific list of responses to your comments:
 \begin{center}
 {\bf report\_M\_on\_v1}
 \end{center}
 \begin{itemize}
 \item[\rm 1.] Example 4.1 now contains the output of the command {\tt C.VanishingIdeal}.
-\item[\rm 2.] \textcolor{red}{Nathan, please write something about the minimum weight}
+\item[\rm 2.] As was suggested, an option to manually specify the strategy used by the function {\ttfamily minimumWeight} has been implemented. We have also made another change to this function which was not suggested in order to address apparent problems with performance. Namely, a new strategy called {\ttfamily OneInfoSet} which is strictly faster than the {\ttfamily BruteForce} strategy that it used previously has been added.
 \item[\rm 3.] We were not aware of this convention, thank you for pointing it out. We changed the name of the functions.
 \item[\rm 7.] The documentation of the function {\tt LocallyRecoverableCode} has been corrected and now has more information.
 \item[\rm 9.] In the documentation for shorten, the word shorten in the title has not been capitalized because according to the literature of {\it Macaulay2}, the titles start with a lower letter. Actually, we were not aware of this and now all the titles start with a lower letter.
