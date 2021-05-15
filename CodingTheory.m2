@@ -109,6 +109,7 @@ export {
     "syndromeDecode",
     "shortestPath",
     "minimumWeight",
+    "Strat",
 --    "matroidPartition",
     "weight",
     "enumerateVectors"
@@ -684,28 +685,28 @@ chooseStrat LinearCode := C -> (
 	)   
     );
 
-minimumWeight = method(TypicalValue => ZZ, Options => {Strategy=>""})
+minimumWeight = method(TypicalValue => ZZ, Options => {Strat=>""})
 minimumWeight LinearCode := ZZ => opts -> C -> (
     
     if C.cache#?("minWeight") then(
 	return C.cache#"minWeight";
 	); 
     
-    if opts.Strategy == "MatroidPartition" then (
+    if opts.Strat == "MatroidPartition" then (
     	return minDistMatroidPart C;
 	);
-    if opts.Strategy == "BruteForce" then(
+    if opts.Strat == "BruteForce" then(
 	return minDistBrute C;
 	);
-    if opts.Strategy == "OneInfoSet" then(
+    if opts.Strat == "OneInfoSet" then(
 	return minDistOneInfoSet C;
 	);
-    if opts.Strategy != "" then(
-	error "Strategy '"|toString(opts.Strategy)|"' not recognized.";
+    if opts.Strat != "" then(
+	error "Strategy '"|toString(opts.Strat)|"' not recognized.";
 	);
     
     -- If no strategy specified, try to guess which one to use.
-    minimumWeight(C, Strategy=>(chooseStrat C) )
+    minimumWeight(C, Strat=>(chooseStrat C) )
     )
 
 
@@ -3524,11 +3525,12 @@ doc ///
 
 doc ///
     Key
-	[minimumWeight, Strategy]
+    	Strat
+	[minimumWeight, Strat]
     Headline
     	Specify the algorithm used to perform a minimum weight computation.
     Usage
-    	minimumWeight(C, Strategy=>StratName)
+    	minimumWeight(C, Strat=>StratName)
     Inputs
     	C:LinearCode
 	StratName:String
@@ -3536,8 +3538,8 @@ doc ///
     Description
         Text
 	    By default, the function @TO "minimumWeight"@ uses the function @TO "chooseStrat"@ to estimate the optimal strategy for a 
-	    given linear code. Specifying a linear code manually is not recommended unless you suspect that the automatically chosen
-	    strategy is not the optimal one.    
+	    given linear code. Specifying a strategy manually is not recommended in the majority of cases because @TO "chooseStrat"@ 
+	    reliably chooses the best strategy based on approximatations of peformance.
 	
             The valid options of the argument @TT "StratName"@ are:
 	    
@@ -3578,13 +3580,13 @@ doc ///
     Description
     	Text
        	    This function returns the name of the strategy that would be automatically chosen by function @TO "minimumWeight"@ if no
-	    value of the optional argument @TT "Strategy"@ is specified. 
+	    value of the optional argument @TT "Strat"@ is specified. 
 	Example
 	    chooseStrat(hammingCode(2,3))
 	    F = GF(16);
 	    chooseStrat(linearCode random(F^5, F^10))
     SeeAlso
-    	[minimumWeight, Strategy]
+    	[minimumWeight, Strat]
 ///
 
 doc ///
@@ -3601,34 +3603,24 @@ doc ///
     	:ZZ
     Description
     	Text
-	    The weight of a codeword is the number of
-	    its non-zero entries. This function returns the minimum weight of {\tt C}, which is
-	    the minimum of the weights of all the codewords in {\tt C}.
+    	    The minimum weight of a linear code $C$ is the minimum Hamming weight of its non-zero codewords. 
+	    It is known that computing the minimum weight of a linear code is an NP-hard problem. 
+	    	    
+    	    If no value is specified for the optional argument @TT "Strat"@ is specified, 
+	    the function @TO "chooseStrat"@ is used internally to choose a strategy. In the majority of use 
+	    cases, it is best not to specify a value of the optional strategy argument because a strategy is
+	    automatically chosen based on built-in approximations of performance. 
 	Example
-	    minimumWeight(hammingCode(2,3))
+	    minimumWeight hammingCode(2,3)
+    SeeAlso
+        weight
     Subnodes
-	:Related function:
-	weight
-    Caveat
-    	To the best of our knowledge, the algorithm is implemented well. Unfortunately sometimes it is slow.
-	It may be because it depends on the Matroid package or an error in the implementation.
+        :Related functions
+	chooseStrat
+	Strat
+
 ///
--*
-doc ///
-	Key
-		Strategy
-	Headline
-		Optional input for the {\tt minimumWeight} function
-	Usage
-		minimumWeight(...,Strategy=>...)
-    	Description
-	    Text
-	    	Values for {\tt Strategy} are {\tt MatroidPartition} and {\tt BruteForce}.
-		If no {\tt Strategy} is specified, the function tries to guess which one to use.
-	    Example
-	    	minimumWeight(hammingCode(2,3),Strategy => BruteForce)
-///
-*-
+
 doc ///
         Key
                shortestPath

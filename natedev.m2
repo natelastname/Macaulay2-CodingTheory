@@ -7,7 +7,7 @@ installPackage(
     "CodingTheory",
     FileName=>pathToPackage,
     RunExamples => true,
-    RerunExamples => true
+    RerunExamples => false
     )
 
 error "stop"
