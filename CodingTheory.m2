@@ -1,4 +1,23 @@
 -- -*- coding: utf-8 -*-
+-*
+Copyright (C) 2021  Taylor Ball, Eduardo Camps, Henry Chimal-Dzul,
+Delio Jaramillo-Velez, Hiram H. Lopez, Nathan Nichols, Matthew Perkins,
+Ivan Soprunov, German Vera, Gwyn Whieldon
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*-
+
 newPackage(
 	"CodingTheory",
     	Version => "1.0", 
@@ -54,7 +73,7 @@ export {
     "ParityCheckRows",
     "ParityCheckMatrix",
     "Code",
-    
+    "chooseStrat",    
     -- Evaluation Code
     -- Types and Constructors
     "EvaluationCode",
@@ -109,6 +128,7 @@ export {
     "syndromeDecode",
     "shortestPath",
     "minimumWeight",
+    "Strat",
 --    "matroidPartition",
     "weight",
     "enumerateVectors"
@@ -552,6 +572,36 @@ minDistBrute LinearCode := Number => C -> (
     minWeightC
     )
 
+minDistOneInfoSet = method(TypicalValue => Number)
+minDistOneInfoSet LinearCode := ZZ => C -> (
+    genMat := stdForm C.GeneratorMatrix;
+    k := rank genMat;
+    n := numcols genMat;
+    
+    dlb := 1;
+    dub := n - k + 1;
+    w := 1;
+    
+    while w <= k and dlb < dub do(
+	--print("-----------------------------------------------");
+	--print("Current weight: "|toString(w)|" / "|toString(k));
+	--print("Current lower bound:"|toString(dlb));
+	--print("Current upper bound:"|toString(dub));
+	
+	-- Set msgsK to a list of all weight k messages.
+	msgsK := apply(subsets(k,w), x -> subsetToList(k,x));
+	msgsK = flatten apply(msgsK, x -> enumerateVectors(ring(C), x));
+	-- Encode the messages in msgsK.
+	codewordsK := apply(msgsK, u -> flatten entries ((matrix({toList u}))*genMat));
+	-- Update the lower/upper bounds.
+	dub = min(append(apply(codewordsK, i->weight i),dub));
+	dlb = w + 1;
+	w = w + 1;
+	);
+    C.cache#"minWeight" = dub;
+    dub
+    )
+
 -- Calculate minimum distance using the matroid partition algorithm.
 minDistMatroidPart = method(TypicalValue => Number)
 minDistMatroidPart LinearCode := ZZ => C -> (
@@ -567,6 +617,12 @@ minDistMatroidPart LinearCode := ZZ => C -> (
     cMatroid := matroid(M);
     cMatroids := apply(toList(1..l),i->cMatroid);
     T := matroidPartition(cMatroids);
+    
+    if T == {} then(
+	-- No matroid parition exists. 
+	-- Not sure if there is a better option in this case.
+       	return minDistOneInfoSet C;
+	);
     r := {}; --list of relative ranks
     currentUnion := set();
     for i from 0 to length T-1 do (
@@ -577,6 +633,11 @@ minDistMatroidPart LinearCode := ZZ => C -> (
     dupper := n-k+1; --Start with Singleton Bound
     dlower := 0;
     while(true) do (
+	--print("-----------------------------------------------");
+	--print("Current weight: "|toString(w)|" / "|toString(k));
+	--print("Current information set: "|toString(j)|" / "|toString(D));
+        --print("Current lower bound:"|toString(dlower));
+        --print("Current upper bound:"|toString(dupper));
         permutation := join(T_(j-1),toList(0..n-1)-set(T_(j-1)));
 	G := reducedMatrix(M_permutation);
     	
@@ -585,46 +646,50 @@ minDistMatroidPart LinearCode := ZZ => C -> (
 	specialCodewords := apply(sameWeightWords, u -> flatten entries ((matrix({toList u}))*G));
     	
         dupper = min(append(apply(specialCodewords, i->weight i),dupper));
-        dlower = sum(toList apply(1..j,i->max(0,w+1-k+r_(i-1))))+sum(toList apply(j+1..D,i->max(0,w-k+r_(i-1))));
+        dlower =          sum(toList apply(1..j,i->max(0,w-k+r_(i-1))));
+	dlower = dlower + sum(toList apply(j+1..D,i->max(0,w-k+r_(i-1))));
 	
 	if dlower >= dupper then (
 	    C.cache#"minWeight" = dupper;
+	    --print("-----------------------------------------------");
+    	    --error "stop";
 	    return dupper;
-    	    ) else (
-	    if j < D then j = j+1 else w = w+1
+    	    );
+	
+	if j < D then (
+	    j = j + 1;
+	    ) else(
+	    w = w + 1;
 	    );
-    	if w > k then error "No minimum weight found.";
+	-- This error is a failsafe to prevent an infinite loop.   
+    	if w > k then error "No minimum weight found. (This is a bug, try using a different strategy.)";
     	)
     )
 
-minimumWeight = method(TypicalValue => ZZ, Options => {Strategy=>""})
-minimumWeight LinearCode := ZZ => opts -> C -> (
-    
-    if C.cache#?("minWeight") then(
-	return C.cache#"minWeight";
-	);
-    if opts.Strategy == "MatroidPartition" then (
-    	return minDistMatroidPart C;
-	);
-    if opts.Strategy == "BruteForce" then(
-	return minDistBrute C;
-	);
-    if opts.Strategy != "" then(
-	error "Strategy '"|toString(opts.Strategy)|"' not recognized.";
-	);
-    
-    -- If no strategy specified, try to guess which one to use.
+-- Unlike the function reducedMatrix, this function may change the actual vector 
+-- space that defines the linear code. However, the minimum distance is preserved.
+stdForm = M -> (
+    M = reducedMatrix M;
+    -- remove the columns equal to zero
+    M = submatrix'(M, toList select(0..(numcols M)-1, x -> M_x == M_x - M_x));
+    first permuteToStandardForm M
+    );
+
+-- Estimate the best strategy for a given linear code.
+-- The reason this is a seperate function is because it is sometimes desirable to know what 
+-- strategy minimumDistance chooses. For example, during debugging, development and testing.
+chooseStrat = method(TypicalValue => String)
+chooseStrat LinearCode := C -> (
     M := matrix C.Generators;
     k := rank reducedMatrix(C.GeneratorMatrix);
 
     -- The number of matrix multiplications needed to perform the brute force algorithm.
-    R := ring(C);
+    R := ring C;
     numCodewords := (R.order)^k;
-    	
     -- The number of  (k x k) matrices it will need to compute the rank of.
     -- This computation takes place in the matroid constructor, matroid(Matrix). 
     numMatrices := binomial(numcols M, k);
-	
+    
     -- This estimation is such that the only way that it can choose to use the
     -- brute force algorithm when it should have used the matroid partition 
     -- algorithm is if the code in the Matroids package changes. (This assumes that
@@ -632,10 +697,35 @@ minimumWeight LinearCode := ZZ => opts -> C -> (
     -- same amount of time. Also, it assumes that this function actually does call "matroid" 
     -- on the generator matrix of C).
     if numMatrices > numCodewords then(
-	minDistBrute C
+	-- The "OneInfoSet" strategy is a direct improvement over "BruteForce."
+	"OneInfoSet"
 	)else(
-	minDistMatroidPart C
+	"MatroidPartition"
 	)   
+    );
+
+minimumWeight = method(TypicalValue => ZZ, Options => {Strat=>""})
+minimumWeight LinearCode := ZZ => opts -> C -> (
+    
+    if C.cache#?("minWeight") then(
+	return C.cache#"minWeight";
+	); 
+    
+    if opts.Strat == "MatroidPartition" then (
+    	return minDistMatroidPart C;
+	);
+    if opts.Strat == "BruteForce" then(
+	return minDistBrute C;
+	);
+    if opts.Strat == "OneInfoSet" then(
+	return minDistOneInfoSet C;
+	);
+    if opts.Strat != "" then(
+	error "Strategy '"|toString(opts.Strat)|"' not recognized.";
+	);
+    
+    -- If no strategy specified, try to guess which one to use.
+    minimumWeight(C, Strat=>(chooseStrat C) )
     )
 
 
@@ -1943,7 +2033,7 @@ K=ZZ/3
 R=K[t3,t2,t1,MonomialOrder=>Lex]
 I=ideal(t1*t2^2-t1^2*t2,t1*t3^3-t1^3*t3,t2*t3^3-t2^3*t3)
 vNumber(I)
-assert(vNumber(I)==regularity coker gens gb I-1)
+assert(vNumber(I) == (regularity coker gens gb I)-1)
 ///
 
 TEST ///
@@ -3452,6 +3542,71 @@ doc ///
 ///
 
 
+doc ///
+    Key
+    	Strat
+	[minimumWeight, Strat]
+    Headline
+    	Specify the algorithm used to perform a minimum weight computation.
+    Usage
+    	minimumWeight(C, Strat=>StratName)
+    Inputs
+    	C:LinearCode
+	StratName:String
+	    The name of the desired algorithm to use.
+    Description
+        Text
+	    By default, the function @TO "minimumWeight"@ uses the function @TO "chooseStrat"@ to estimate the optimal strategy for a 
+	    given linear code. Specifying a strategy manually is not recommended in the majority of cases because @TO "chooseStrat"@ 
+	    reliably chooses the best strategy based on approximatations of peformance.
+	
+            The valid options of the argument @TT "StratName"@ are:
+	    
+	    @UL {
+	    	{BOLD {"MatroidPartition"}, ": The most advanced algorithm, but requires a longer up-front computation."},
+	    	{BOLD {"OneInfoSet"},  ": An algortihm that is always faster than ", TT {"BruteForce"},"."},
+		{BOLD {"BruteForce"}, ": (Not recommended) Determine the minimum weight by enumerating all codewords."}
+	   	}@
+	    	    
+	    @TT "MatroidPartition"@ is the most advanced strategy, but requires a longer up-front computation. Specifically, it has to 
+	    compute the matroid associated with the given linear code's generator matrix and then compute a partition of it into independent
+	    sets. If such a partition exists, this algorithm will be strictly faster than @TT "OneInfoSet"@ after the matroid partition
+	    has been computed.
+	    
+	    @TT "OneInfoSet"@ can be viewed as a direct improvement over the @TT "BruteForce"@ strategy. The properties of this algorithm
+	    imply that it is always as fast or faster than @TT "BruteForce"@. 
+	       
+	    @TT "BruteForce"@ is the simplest and most reliable strategy, but also almost always the slowest. It is intended mainly for
+	    internal purposes such as debbugging and testing the other strategies. 
+    SeeAlso
+        chooseStrat
+	       
+
+///
+
+doc ///
+    Key
+    	chooseStrat
+	(chooseStrat,LinearCode)
+    Headline
+    	Estimate the optimal strategy to compute the minimum weight of a linear code. 
+    Usage
+    	chooseStrat C
+    Inputs
+    	C: LinearCode
+    Outputs
+    	:String
+    Description
+    	Text
+       	    This function returns the name of the strategy that would be automatically chosen by function @TO "minimumWeight"@ if no
+	    value of the optional argument @TT "Strat"@ is specified. 
+	Example
+	    chooseStrat(hammingCode(2,3))
+	    F = GF(16);
+	    chooseStrat(linearCode random(F^5, F^10))
+    SeeAlso
+    	[minimumWeight, Strat]
+///
 
 doc ///
     Key
@@ -3467,34 +3622,24 @@ doc ///
     	:ZZ
     Description
     	Text
-	    The weight of a codeword is the number of
-	    its non-zero entries. This function returns the minimum weight of {\tt C}, which is
-	    the minimum of the weights of all the codewords in {\tt C}.
+    	    The minimum weight of a linear code $C$ is the minimum Hamming weight of its non-zero codewords. 
+	    It is known that computing the minimum weight of a linear code is an NP-hard problem. 
+	    	    
+    	    If no value is specified for the optional argument @TT "Strat"@ is specified, 
+	    the function @TO "chooseStrat"@ is used internally to choose a strategy. In the majority of use 
+	    cases, it is best not to specify a value of the optional strategy argument because a strategy is
+	    automatically chosen based on built-in approximations of performance. 
 	Example
-	    minimumWeight(hammingCode(2,3))
+	    minimumWeight hammingCode(2,3)
+    SeeAlso
+        weight
     Subnodes
-	:Related function:
-	weight
-    Caveat
-    	To the best of our knowledge, the algorithm is implemented well. Unfortunately sometimes it is slow.
-	It may be because it depends on the Matroid package or an error in the implementation.
+        :Related functions
+	chooseStrat
+	Strat
+
 ///
--*
-doc ///
-	Key
-		Strategy
-	Headline
-		Optional input for the {\tt minimumWeight} function
-	Usage
-		minimumWeight(...,Strategy=>...)
-    	Description
-	    Text
-	    	Values for {\tt Strategy} are {\tt MatroidPartition} and {\tt BruteForce}.
-		If no {\tt Strategy} is specified, the function tries to guess which one to use.
-	    Example
-	    	minimumWeight(hammingCode(2,3),Strategy => BruteForce)
-///
-*-
+
 doc ///
         Key
                shortestPath
