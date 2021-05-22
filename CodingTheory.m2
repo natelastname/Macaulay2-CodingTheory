@@ -21,7 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 newPackage(
 	"CodingTheory",
     	Version => "1.0", 
-    	Date => "May 13, 2020",
+    	Date => "May 25, 2020",
     	Authors => {
 	     {Name => "Taylor Ball", Email => "trball13@gmail.com"},
 	     {Name => "Eduardo Camps", Email => "camps@esfm.ipn.mx"},
@@ -2525,7 +2525,7 @@ doc ///
 	informationRate
 	linearCode
 	messages
-	minimumWeight
+	weight
 	syndromeDecode
 	@TO (symbol ==,LinearCode,LinearCode)@
 ///
@@ -3061,6 +3061,9 @@ doc ///
 	    weight({1,0,1,0,1})
 	Example
 	    weight({0,123,48,0,256})
+    Subnodes
+        :Related functions
+	minimumWeight
 ///
     
 doc ///
@@ -3553,9 +3556,9 @@ doc ///
     Inputs
     	C:LinearCode
 	StratName:String
-	    The name of the desired algorithm to use.
     Description
         Text
+	    {\tt StratName} is the name of the desired algorithm to use.
 	    By default, the function @TO "minimumWeight"@ uses the function @TO "chooseStrat"@ to estimate the optimal strategy for a 
 	    given linear code. Specifying a strategy manually is not recommended in the majority of cases because @TO "chooseStrat"@ 
 	    reliably chooses the best strategy based on approximatations of peformance.
@@ -3577,7 +3580,10 @@ doc ///
 	    imply that it is always as fast or faster than @TT "BruteForce"@. 
 	       
 	    @TT "BruteForce"@ is the simplest and most reliable strategy, but also almost always the slowest. It is intended mainly for
-	    internal purposes such as debbugging and testing the other strategies. 
+	    internal purposes such as debbugging and testing the other strategies.
+        Example
+	    C=hammingCode(2,3);
+	    minimumWeight(C, Strat=>"BruteForce")
     SeeAlso
         chooseStrat
 	       
@@ -3630,7 +3636,9 @@ doc ///
 	    cases, it is best not to specify a value of the optional strategy argument because a strategy is
 	    automatically chosen based on built-in approximations of performance. 
 	Example
-	    minimumWeight hammingCode(2,3)
+    	    C=hammingCode(2,3);
+	    minimumWeight C
+	    minimumWeight(C, Strat=>"BruteForce")
     SeeAlso
         weight
     Subnodes
