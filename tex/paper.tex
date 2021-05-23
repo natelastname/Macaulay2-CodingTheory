@@ -90,7 +90,7 @@ Apartado Postal
 
 \begin{abstract}
 In this {\it Macaulay2} \cite{M2} package we implement an object called {\tt LinearCode}. We implement functions that compute basic parameters and objects associated with a linear code, such as generator and parity check matrices, the dual code, length, dimension, and minimum distance, among others. We implement an object called {\tt EvaluationCode}, a construction which allows to study linear codes using tools of
-algebraic geometry and commutative algebra. We implement functions to generate important families of linear codes such as Hamming codes, cyclic codes, Reed--Solomon codes, Reed--Muller codes, Cartesian codes, monomial--Cartesian codes, and toric codes. In addition, we implement functions for the syndrome decoding algorithm and locally recoverable code construction, which are important tools in applications of linear codes. The package \textit{CodingTheory} is available at \url{https://github.com/Macaulay2/Workshop-2020-Cleveland/tree/CodingTheory/CodingTheory}
+algebraic geometry and commutative algebra. We implement functions to generate important families of linear codes such as Hamming codes, cyclic codes, Reed--Solomon codes, Reed--Muller codes, Cartesian codes, monomial--Cartesian codes, and toric codes. In addition, we implement functions for the syndrome decoding algorithm and locally recoverable code construction, which are important tools in applications of linear codes.% The package \textit{CodingTheory} is available at \url{https://github.com/Macaulay2/Workshop-2020-Cleveland/tree/CodingTheory/CodingTheory}
 \end{abstract}
 
 \maketitle
@@ -445,7 +445,7 @@ Inputs:
 \begin{minipage}[t]{0.45\textwidth}
  \begin{itemize}[leftmargin=0.55 cm]
   \item {\tt E}, a list of elements of {\tt F}
-  \item {\tt L}, a list of vectors in $F^{\mathtt{m}}$
+  \item {\tt L}, a list of vectors in ${\tt F}^{\mathtt{m}}$
  \end{itemize}
 \end{minipage}
 
@@ -566,88 +566,91 @@ We thank Federico Galetto, Courtney Gibbons, Hiram L\'opez, and Branden Stone fo
 
 \begin{thebibliography}{99}
 
-
-\bibitem{Vardy} A. Vardy, "The intractability of computing the minimum distance of a code," in IEEE Transactions on Information Theory, vol. 43, no. 6, pp. 1757-1766, Nov. 1997, doi: 10.1109/18.641542.
-
 \bibitem{carvalho4} C. Carvalho, V. G. Neumann and H. H. L\'opez,
 Projective Nested Cartesian Codes,
-Bull Braz Math Soc, New Series (2016).
+Bulletin of the Brazilian Mathematical Society, New Series, {\bf 48} (2017), no. 2, 283--302.
 
-\bibitem{CSTVV} S. M. Cooper, A. Seceleanu, S. O. Toh\v{a}neanu,
-M. Vaz Pinto and R. H. Villarreal, 
-Generalized minimum distance functions and algebraic invariants of
-Geramita ideals, Adv. in Appl. Math. {\bf 112} (2020), 101940.
+\bibitem{CSTVV} S. M. Cooper, A. Seceleanu, S. O. Toh\v{a}neanu, M. Vaz Pinto and R. H. Villarreal, 
+Generalized minimum distance functions and algebraic invariants of Geramita ideals,
+Advances in Applied Mathematics, {\bf 112} (2020), 101940.
 
 \bibitem{CLO}D. Cox, J. Little and D. O-Shea,
 {\it Ideals, Varieties, and Algorithms}, Springer-Verlag, 1992.
 
 \bibitem{GLS} L. Gold, J. Little, H. Schenck,
-{Cayley-Bacharach and evaluation codes on complete intersections},
- J. Pure Appl. Algebra  {\bf 196} (1) (2005) 91--99.
+Cayley-Bacharach and evaluation codes on complete intersections,
+Journal of Pure and Applied Algebra, {\bf 196} (2005), no. 1, 91--99.
 
 \bibitem{M2} D. R. Grayson and M. E. Stillman,
 {\it Macaulay2}, a software system for research in algebraic geometry.
 Available at \url{http://www.math.uiuc.edu/Macaulay2/}.
 
-\bibitem{Ha1} J. Hansen, { Toric Surfaces and Error--correcting
-    Codes} in Coding Theory, Cryptography, and Related Areas, Springer
- (2000), pp. 132-142.
+\bibitem{Ha1} J. Hansen,
+Toric Surfaces and Error--correcting Codes,
+in Coding Theory, Cryptography, and Related Areas, (2000), pp. 132-142. Springer, Berlin, Heidelberg.
 
 \bibitem{huf-pless} W. Huffman and V. Pless,
 {\it Fundamentals of Error-Correcting Codes},
 Cambridge University Press, Cambridge, 2003.
 
-\bibitem{LSc} J. Little, H. Schenck,
-{\em Toric surface codes and Minkowski sums},
-SIAM J. Discrete Math. {\bf  20}  (2006),  no. 4, 999--1014 (electronic).
+\bibitem{LSc} J. Little and H. Schenck,
+Toric surface codes and Minkowski sums,
+SIAM Journal on Discrete Mathematics, {\bf  20}  (2006),  no. 4, 999--1014.
 
 \bibitem{lopez-villa} H. H. L\'opez, C. Renter\'ia-M\'arquez and R. H. Villarreal,
 Affine Cartesian codes,
-Des.\ Codes Cryptogr. \textbf{71}(1) (2014) 5--19.
+{Designs, Codes and Cryptography}, {\bf 71} (2014), no. 1, 5--19.
 
 \bibitem{MacWilliams-Sloane} F. J. MacWilliams and N. J. A. Sloane, 
 {\it The Theory of Error-correcting Codes}, North-Holland, 1977.
 
-\bibitem{MPV} J. Mart\'inez-Bernal, Y. Pitones and R. H. Villarreal,
-Minimum distance functions of graded ideals and Reed-Muller-type codes,
-J. Pure Appl. Algebra 221 (2017), 251--275.
-
-
 \bibitem{MPV2} J. Mart\'inez-Bernal, Y. Pitones and R. H. Villarreal,
 Minimum distance functions of complete intersections,
-J. Algebra Appl. 17 (2018), no. 11, 1850204 (22 pages).
+Journal of Algebra and Its Applications, {\bf 17} (2018), no. 11, 1850204 (22 pages).
+
+\bibitem{MPV} J. Mart\'inez-Bernal, Y. Pitones and R. H. Villarreal,
+Minimum distance functions of graded ideals and Reed-Muller-type codes,
+Journal of Pure and Applied Algebra. {\bf 221} (2017), no. 2, 251--275.
 
 \bibitem{algcodes} C. Renter\'\i a, A. Simis and R. Villarreal,
 Algebraic methods for parameterized codes and invariants of vanishing ideals over finite fields,
-Finite Fields Appl. {\bf 17} (2011), no. 1, 81--104.
+Finite Fields and Their Applications, {\bf 17} (2011), no. 1, 81--104.
 
 \bibitem{Ru}D. Ruano, 
-{On the parameters of $r$-dimensional toric codes},
-Finite Fields and Their Applications {\bf 13} (2007), pp. 962--976.
+On the parameters of $r$-dimensional toric codes,
+Finite Fields and Their Applications, {\bf 13} (2007), no. 4, pp. 962--976.
 
 \bibitem{Shannon} C. Shannon,
 A Mathematical Theory of Communication,
 The Bell System Technical Journal, {\bf 27} (1948), no. 3, 379--423.
 
-\bibitem{SoSo} I.~Soprunov, J.~Soprunova, {Toric surface codes and Minkowski length of polygons}, SIAM J. Discrete Math. {\bf 23}, Issue 1, (2009) 384-400 
+\bibitem{SoSo} I.~Soprunov, J.~Soprunova,
+Toric surface codes and Minkowski length of polygons,
+SIAM Journal on Discrete Mathematics, {\bf 23} (2009), no. 1, 384--400.
 
-\bibitem{So1} I. Soprunov,  {Toric complete intersection codes.} Journal of Symbolic Computation. {\bf 50}, (2013) 374--385.
+\bibitem{So1} I. Soprunov,
+Toric complete intersection codes,
+Journal of Symbolic Computation, {\bf 50} (2013), 374--385.
 
 \bibitem{TamoBarg} I. Tamo and A. Barg,
 A Family of Optimal Locally Recoverable Codes,
-IEEE Transactions on Information Theory {\bf 60} (2014), no. 8, 4661--4676.
+IEEE Transactions on Information Theory, {\bf 60} (2014), no. 8, 4661--4676.
 
 \bibitem{renteria-tapia-ca2} C. Renter\'\i a and H. Tapia-Recillas, 
-Reed-Muller codes: an ideal theory approach, Comm. Algebra {\bf 25}
-(1997), no. 2, 401--413.
+Reed-Muller codes: an ideal theory approach,
+Communications in Algebra, {\bf 25} (1997), no. 2, 401--413.
 
 \bibitem{van-lint} J. H. Van Lint,
-{ Introduction to coding theory},
+Introduction to coding theory,
 Third edition, Graduate Texts in Mathematics {\bf 86}, Springer-Verlag, Berlin, 1999.
+
+\bibitem{Vardy} A. Vardy,
+The intractability of computing the minimum distance of a code,
+IEEE Transactions on Information Theory, {\bf 43} (1997), no. 6, 1757--1766.
 
 \bibitem{monalg} R. H. Villarreal, {\it Monomial Algebras\/},
 Second edition, 
 Monographs and Research Notes in Mathematics, Chapman and Hall/CRC,
-Boca Raton, FL, 2015.
+Boca Raton, FL (2015).
 \end{thebibliography}
 \end{document}
